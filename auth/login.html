@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Connexion | Loc'Reaction VTC</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--primary:#551B8C;--primary-light:#7e3db0;--primary-dark:#3d1266;--primary-xlight:rgba(85,27,140,0.08);--gold:#FFCC00;--gold-dark:#e6b800;--dark:#1a1a2e;--white:#fff;--gray:#7c7c9e;--gray-light:#e8e4f0;--gray-xlight:#f9f7fd;--success:#27ae60;--danger:#e74c3c;--shadow-md:0 6px 24px rgba(85,27,140,0.12);--shadow-lg:0 12px 48px rgba(85,27,140,0.18);--radius:12px;--radius-lg:18px;--radius-xl:24px;--radius-pill:9999px;}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Poppins',sans-serif;min-height:100vh;display:grid;grid-template-columns:1fr 1fr;background:var(--white);}
+/* Left panel */
+.auth-left{background:linear-gradient(145deg,#15002e,#3d1266 60%,#2d1a5e);display:flex;flex-direction:column;justify-content:space-between;padding:48px;position:relative;overflow:hidden;}
+.auth-left::before{content:'';position:absolute;top:-80px;right:-80px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(255,204,0,0.15),transparent 70%);}
+.auth-left::after{content:'';position:absolute;bottom:-60px;left:-40px;width:250px;height:250px;border-radius:50%;background:radial-gradient(circle,rgba(85,27,140,0.5),transparent 70%);}
+.auth-logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.3rem;color:#fff;z-index:1;position:relative;}
+.auth-logo-icon{width:44px;height:44px;background:rgba(255,204,0,0.15);border:2px solid rgba(255,204,0,0.4);border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:1.2rem;}
+.auth-logo span{color:var(--gold);}
+.auth-tagline{z-index:1;position:relative;}
+.auth-tagline h2{font-size:2rem;font-weight:800;color:#fff;line-height:1.2;margin-bottom:16px;}
+.auth-tagline h2 span{color:var(--gold);}
+.auth-tagline p{font-size:0.9rem;color:rgba(255,255,255,0.65);line-height:1.7;}
+.auth-features{z-index:1;position:relative;display:flex;flex-direction:column;gap:14px;}
+.auth-feature{display:flex;align-items:center;gap:12px;color:rgba(255,255,255,0.8);font-size:0.85rem;}
+.auth-feature i{width:32px;height:32px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:0.85rem;flex-shrink:0;}
+/* Right panel */
+.auth-right{display:flex;align-items:center;justify-content:center;padding:48px;background:var(--gray-xlight);}
+.auth-box{width:100%;max-width:420px;}
+.auth-box h1{font-size:1.6rem;font-weight:800;color:var(--dark);margin-bottom:6px;}
+.auth-box p{font-size:0.87rem;color:var(--gray);margin-bottom:28px;}
+/* Tabs */
+.role-tabs{display:flex;gap:6px;background:var(--gray-light);padding:5px;border-radius:var(--radius);margin-bottom:24px;}
+.role-tab{flex:1;padding:9px;text-align:center;border-radius:calc(var(--radius) - 2px);font-size:0.8rem;font-weight:600;color:var(--gray);cursor:pointer;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:6px;}
+.role-tab.active{background:var(--white);color:var(--primary);box-shadow:var(--shadow-md);}
+/* Form */
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:0.82rem;font-weight:600;color:var(--dark);margin-bottom:7px;}
+.form-icon-wrap{position:relative;}
+.form-icon-wrap input{width:100%;padding:12px 16px 12px 44px;border:1.5px solid var(--gray-light);border-radius:var(--radius);font-size:0.9rem;color:var(--dark);background:var(--white);outline:none;transition:all 0.2s;font-family:'Poppins',sans-serif;}
+.form-icon-wrap input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-xlight);}
+.form-icon-wrap i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--gray);font-size:0.95rem;}
+.form-icon-wrap .eye-toggle{left:auto;right:14px;cursor:pointer;color:var(--gray);}
+.form-icon-wrap .eye-toggle:hover{color:var(--primary);}
+.form-error{font-size:0.75rem;color:var(--danger);margin-top:5px;display:none;}
+.form-error.show{display:block;}
+.forgot{font-size:0.78rem;color:var(--primary);font-weight:600;text-align:right;display:block;margin-top:-10px;margin-bottom:18px;cursor:pointer;}
+.btn-submit{width:100%;padding:13px;background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;border:none;border-radius:var(--radius);font-size:0.95rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.btn-submit:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.btn-submit:disabled{opacity:0.6;transform:none;}
+.demo-hint{background:var(--primary-xlight);border:1px solid rgba(85,27,140,0.15);border-radius:var(--radius);padding:14px;margin-bottom:20px;}
+.demo-hint p{font-size:0.78rem;color:var(--primary);font-weight:500;margin-bottom:8px;}
+.demo-hint table{width:100%;border-collapse:collapse;}
+.demo-hint td{font-size:0.72rem;padding:2px 6px;color:var(--dark);}
+.demo-hint td:first-child{font-weight:600;color:var(--primary);}
+.demo-hint .use-demo{font-size:0.72rem;color:var(--primary);font-weight:700;cursor:pointer;margin-left:6px;text-decoration:underline;}
+.divider{display:flex;align-items:center;gap:12px;margin:20px 0;}
+.divider::before,.divider::after{content:'';flex:1;height:1px;background:var(--gray-light);}
+.divider span{font-size:0.78rem;color:var(--gray);}
+.register-link{text-align:center;font-size:0.85rem;color:var(--gray);}
+.register-link a{color:var(--primary);font-weight:700;}
+.toast-area{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;gap:10px;}
+.toast{display:flex;align-items:center;gap:12px;padding:14px 20px;border-radius:14px;background:var(--dark);color:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.2);min-width:280px;font-size:0.85rem;font-weight:500;animation:toastIn 0.4s ease;}
+.toast.error{background:var(--danger);}
+.toast.success{background:var(--success);}
+@keyframes toastIn{from{opacity:0;transform:translateX(60px);}to{opacity:1;transform:translateX(0);}}
+@media(max-width:768px){body{grid-template-columns:1fr;}.auth-left{display:none;}.auth-right{padding:32px 20px;background:var(--white);}}
+</style>
+</head>
+<body>
+
+<div class="auth-left">
+  <div class="auth-logo">
+    <div class="auth-logo-icon"><i class="fas fa-bolt"></i></div>
+    Loc'<span>Reaction</span>
+  </div>
+  <div class="auth-tagline">
+    <h2>Bienvenue sur votre<br>espace <span>personnel</span></h2>
+    <p>Connectez-vous pour accéder à votre tableau de bord personnalisé et gérer vos courses.</p>
+  </div>
+  <div class="auth-features">
+    <div class="auth-feature"><i class="fas fa-lock"></i> Connexion sécurisée SSL</div>
+    <div class="auth-feature"><i class="fas fa-bolt"></i> Accès instantané à votre espace</div>
+    <div class="auth-feature"><i class="fas fa-shield-alt"></i> Données protégées RGPD</div>
+  </div>
+</div>
+
+<div class="auth-right">
+  <div class="auth-box">
+    <h1>Connexion</h1>
+    <p>Entrez vos identifiants pour accéder à votre espace.</p>
+
+    <div class="role-tabs">
+      <div class="role-tab active" data-role="client" onclick="setRole('client',this)"><i class="fas fa-user"></i> Client</div>
+      <div class="role-tab" data-role="chauffeur" onclick="setRole('chauffeur',this)"><i class="fas fa-car"></i> Chauffeur</div>
+      <div class="role-tab" data-role="admin" onclick="setRole('admin',this)"><i class="fas fa-shield-alt"></i> Admin</div>
+    </div>
+
+    <div class="demo-hint">
+      <p><i class="fas fa-info-circle"></i> <strong>Comptes de démonstration</strong></p>
+      <table>
+        <tr><td>Client :</td><td>client@demo.com</td><td><span class="use-demo" onclick="useDemo('client')">Utiliser</span></td></tr>
+        <tr><td>Chauffeur :</td><td>driver@demo.com</td><td><span class="use-demo" onclick="useDemo('chauffeur')">Utiliser</span></td></tr>
+        <tr><td>Admin :</td><td>admin@demo.com</td><td><span class="use-demo" onclick="useDemo('admin')">Utiliser</span></td></tr>
+        <tr><td colspan="3" style="color:var(--gray);font-style:italic;">Mot de passe : demo123</td></tr>
+      </table>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">Adresse email</label>
+      <div class="form-icon-wrap">
+        <i class="fas fa-envelope"></i>
+        <input type="email" id="email" placeholder="votre@email.com">
+      </div>
+      <div class="form-error" id="err-email">Email invalide</div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Mot de passe</label>
+      <div class="form-icon-wrap">
+        <i class="fas fa-lock"></i>
+        <input type="password" id="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')login()">
+        <i class="fas fa-eye eye-toggle" id="eye-toggle" onclick="togglePwd()"></i>
+      </div>
+      <div class="form-error" id="err-pwd">Mot de passe requis</div>
+    </div>
+    <a class="forgot" href="#">Mot de passe oublié ?</a>
+    <button class="btn-submit" id="btn-login" onclick="login()">
+      <i class="fas fa-sign-in-alt"></i> Se connecter
+    </button>
+    <div class="divider"><span>ou</span></div>
+    <div class="register-link">Pas encore de compte ? <a href="register.html">Créer un compte</a></div>
+  </div>
+</div>
+
+<div class="toast-area" id="toast-area"></div>
+
+<script src="../assets/js/store.js"></script>
+<script>
+let currentRole = 'client';
+
+// Pré-remplir depuis URL
+const params = new URLSearchParams(location.search);
+if (params.get('role')) setRoleByName(params.get('role'));
+
+function setRole(role, el) {
+  currentRole = role;
+  document.querySelectorAll('.role-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+}
+function setRoleByName(role) {
+  currentRole = role;
+  document.querySelectorAll('.role-tab').forEach(t => {
+    if (t.dataset.role === role) t.classList.add('active');
+    else t.classList.remove('active');
+  });
+}
+
+const demos = { client:['client@demo.com','demo123'], chauffeur:['driver@demo.com','demo123'], admin:['admin@demo.com','demo123'] };
+function useDemo(role) {
+  setRoleByName(role);
+  document.getElementById('email').value = demos[role][0];
+  document.getElementById('password').value = demos[role][1];
+}
+
+function togglePwd() {
+  const inp = document.getElementById('password');
+  const ic = document.getElementById('eye-toggle');
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  ic.classList.toggle('fa-eye'); ic.classList.toggle('fa-eye-slash');
+}
+
+function toast(msg, type='error') {
+  const a = document.getElementById('toast-area');
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<i class="fas fa-${type==='success'?'check-circle':'times-circle'}"></i> ${msg}`;
+  a.appendChild(t);
+  setTimeout(()=>t.remove(),3500);
+}
+
+function login() {
+  const email    = document.getElementById('email').value.trim();
+  const password = document.getElementById('password').value;
+  document.getElementById('err-email').classList.remove('show');
+  document.getElementById('err-pwd').classList.remove('show');
+  if (!email) { document.getElementById('err-email').classList.add('show'); return; }
+  if (!password) { document.getElementById('err-pwd').classList.add('show'); return; }
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Connexion…';
+  setTimeout(() => {
+    const session = LR.login(email, password);
+    if (!session) {
+      btn.disabled=false; btn.innerHTML='<i class="fas fa-sign-in-alt"></i> Se connecter';
+      toast('Email ou mot de passe incorrect.');
+      return;
+    }
+    toast('Connexion réussie ! Redirection…','success');
+    setTimeout(() => {
+      const dest = { client:'../client/dashboard.html', chauffeur:'../driver/dashboard.html', admin:'../admin/dashboard.html' };
+      window.location.href = dest[session.role] || '../index.html';
+    }, 800);
+  }, 600);
+}
+
+// Si déjà connecté
+const s = LR.getSession();
+if (s) { window.location.href = LR._dashboardFor(s.role); }
+</script>
+</body>
+</html>
