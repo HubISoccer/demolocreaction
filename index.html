@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Loc'Reaction — VTC Premium France</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root {
+  --primary:#551B8C; --primary-light:#7e3db0; --primary-dark:#3d1266;
+  --primary-xlight:rgba(85,27,140,0.08);
+  --gold:#FFCC00; --gold-dark:#e6b800; --gold-light:rgba(255,204,0,0.15);
+  --dark:#1a1a2e; --white:#fff;
+  --gray:#7c7c9e; --gray-light:#e8e4f0; --gray-xlight:#f9f7fd;
+  --shadow-md:0 6px 24px rgba(85,27,140,0.12);
+  --shadow-lg:0 12px 48px rgba(85,27,140,0.18);
+  --radius:12px; --radius-lg:18px; --radius-xl:24px; --radius-pill:9999px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Poppins',sans-serif;background:var(--white);color:var(--dark);overflow-x:hidden;}
+a{text-decoration:none;color:inherit;}
+
+/* NAVBAR */
+nav{position:fixed;top:0;left:0;right:0;height:70px;background:rgba(255,255,255,0.95);backdrop-filter:blur(10px);border-bottom:1px solid var(--gray-light);display:flex;align-items:center;justify-content:space-between;padding:0 40px;z-index:999;box-shadow:var(--shadow-md);}
+.logo{display:flex;align-items:center;gap:12px;font-weight:800;font-size:1.25rem;color:var(--primary);}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:10px;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:1.2rem;box-shadow:var(--shadow-md);}
+.logo span{color:var(--gold);}
+.nav-links{display:flex;align-items:center;gap:32px;}
+.nav-links a{font-size:0.88rem;font-weight:500;color:var(--gray);transition:color 0.2s;}
+.nav-links a:hover{color:var(--primary);}
+.nav-cta{display:flex;gap:10px;}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:10px 22px;border-radius:var(--radius);font-size:0.875rem;font-weight:600;cursor:pointer;transition:all 0.3s;font-family:'Poppins',sans-serif;border:none;}
+.btn-outline{background:transparent;border:1.5px solid var(--primary);color:var(--primary);}
+.btn-outline:hover{background:var(--primary-xlight);}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff;box-shadow:var(--shadow-md);}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--dark);font-weight:700;box-shadow:0 4px 20px rgba(255,204,0,0.3);}
+.btn-gold:hover{transform:translateY(-2px);}
+.btn-lg{padding:14px 36px;font-size:1rem;border-radius:var(--radius-lg);}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;padding:100px 40px 60px;position:relative;overflow:hidden;background:linear-gradient(135deg,#15002e 0%,#2d1a5e 50%,#1a0c40 100%);}
+.hero-bg-circle{position:absolute;border-radius:50%;pointer-events:none;}
+.hero-bg-circle:nth-child(1){width:600px;height:600px;background:radial-gradient(circle,rgba(255,204,0,0.12),transparent 70%);top:-100px;right:-100px;}
+.hero-bg-circle:nth-child(2){width:400px;height:400px;background:radial-gradient(circle,rgba(85,27,140,0.4),transparent 70%);bottom:-80px;left:50px;}
+.hero-content{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:60px;align-items:center;position:relative;z-index:1;}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(255,204,0,0.15);border:1px solid rgba(255,204,0,0.4);color:var(--gold);font-size:0.78rem;font-weight:700;padding:6px 16px;border-radius:var(--radius-pill);margin-bottom:20px;}
+.hero h1{font-size:3.2rem;font-weight:900;color:#fff;line-height:1.15;margin-bottom:20px;}
+.hero h1 span{color:var(--gold);}
+.hero p{font-size:1.05rem;color:rgba(255,255,255,0.75);margin-bottom:32px;line-height:1.7;}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap;}
+.hero-stats{display:flex;gap:32px;margin-top:40px;}
+.hero-stat{text-align:center;}
+.hero-stat .val{font-size:1.8rem;font-weight:800;color:var(--gold);}
+.hero-stat .lbl{font-size:0.75rem;color:rgba(255,255,255,0.6);}
+/* Booking widget hero */
+.hero-widget{background:rgba(255,255,255,0.07);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius-xl);padding:32px;box-shadow:0 20px 60px rgba(0,0,0,0.3);}
+.hw-title{font-size:1rem;font-weight:700;color:#fff;margin-bottom:20px;display:flex;align-items:center;gap:8px;}
+.hw-title i{color:var(--gold);}
+.hw-field{margin-bottom:14px;}
+.hw-label{font-size:0.75rem;font-weight:600;color:rgba(255,255,255,0.7);margin-bottom:6px;display:block;}
+.hw-input{width:100%;padding:12px 16px 12px 44px;background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius);color:#fff;font-size:0.9rem;font-family:'Poppins',sans-serif;outline:none;transition:all 0.2s;}
+.hw-input::placeholder{color:rgba(255,255,255,0.45);}
+.hw-input:focus{border-color:var(--gold);background:rgba(255,255,255,0.15);}
+.hw-field-wrap{position:relative;}
+.hw-field-wrap i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--gold);font-size:0.95rem;}
+.hw-separator{display:flex;align-items:center;gap:10px;margin:6px 0;}
+.hw-separator::before,.hw-separator::after{content:'';flex:1;height:1px;background:rgba(255,255,255,0.15);}
+.hw-dot{width:28px;height:28px;background:rgba(255,255,255,0.1);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:0.8rem;}
+.hw-types{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.hw-type{padding:10px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all 0.2s;}
+.hw-type.active{background:rgba(255,204,0,0.15);border-color:var(--gold);}
+.hw-type-icon{font-size:1.2rem;color:var(--gold);margin-bottom:4px;}
+.hw-type-label{font-size:0.72rem;font-weight:600;color:rgba(255,255,255,0.8);}
+.hw-cta{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:var(--dark);border:none;border-radius:var(--radius);font-size:0.95rem;font-weight:700;cursor:pointer;font-family:'Poppins',sans-serif;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:8px;}
+.hw-cta:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,204,0,0.4);}
+
+/* HOW IT WORKS */
+section{padding:90px 40px;}
+.section-inner{max-width:1200px;margin:0 auto;}
+.section-tag{display:inline-flex;align-items:center;gap:6px;background:var(--primary-xlight);color:var(--primary);font-size:0.75rem;font-weight:700;padding:5px 14px;border-radius:var(--radius-pill);margin-bottom:14px;}
+.section-h2{font-size:2.2rem;font-weight:800;color:var(--dark);margin-bottom:14px;}
+.section-h2 span{color:var(--primary);}
+.section-sub{font-size:1rem;color:var(--gray);max-width:560px;line-height:1.7;}
+.how-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:28px;margin-top:48px;}
+.how-card{background:#fff;border:1px solid var(--gray-light);border-radius:var(--radius-xl);padding:32px;box-shadow:var(--shadow-md);position:relative;transition:all 0.3s;}
+.how-card:hover{transform:translateY(-6px);box-shadow:var(--shadow-lg);}
+.how-num{position:absolute;top:-18px;left:28px;width:38px;height:38px;background:linear-gradient(135deg,var(--primary),var(--primary-light));border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:0.9rem;box-shadow:var(--shadow-md);}
+.how-icon{width:60px;height:60px;background:var(--primary-xlight);border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:1.6rem;color:var(--primary);margin-bottom:20px;}
+.how-title{font-size:1rem;font-weight:700;margin-bottom:10px;}
+.how-desc{font-size:0.87rem;color:var(--gray);line-height:1.65;}
+
+/* FEATURES */
+.features-bg{background:linear-gradient(135deg,#f9f7fd,#f0ebff);}
+.features-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:48px;}
+.feature-card{background:#fff;border-radius:var(--radius-xl);padding:28px;box-shadow:var(--shadow-md);display:flex;gap:20px;align-items:flex-start;transition:all 0.3s;border:1px solid var(--gray-light);}
+.feature-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-lg);}
+.feature-icon{width:52px;height:52px;border-radius:var(--radius-lg);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex-shrink:0;}
+.feature-icon.purple{background:var(--primary-xlight);color:var(--primary);}
+.feature-icon.gold  {background:var(--gold-light);color:var(--gold-dark);}
+.feature-icon.green {background:rgba(39,174,96,0.1);color:#27ae60;}
+.feature-icon.blue  {background:rgba(52,152,219,0.1);color:#3498db;}
+.feature-content h3{font-size:0.95rem;font-weight:700;margin-bottom:8px;}
+.feature-content p{font-size:0.85rem;color:var(--gray);line-height:1.65;}
+
+/* ROLES CTA */
+.roles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;}
+.role-card{border-radius:var(--radius-xl);padding:36px 28px;text-align:center;position:relative;overflow:hidden;cursor:pointer;transition:all 0.3s;}
+.role-card.client {background:linear-gradient(135deg,var(--primary),var(--primary-dark));}
+.role-card.driver {background:linear-gradient(135deg,#1a1a2e,#2d2d4e);}
+.role-card.admin  {background:linear-gradient(135deg,#27ae60,#1e8449);}
+.role-card::before{content:'';position:absolute;top:-40px;right:-40px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,0.06);}
+.role-icon{width:72px;height:72px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:#fff;margin:0 auto 20px;}
+.role-title{font-size:1.15rem;font-weight:800;color:#fff;margin-bottom:10px;}
+.role-desc{font-size:0.85rem;color:rgba(255,255,255,0.75);line-height:1.6;margin-bottom:24px;}
+.role-btn{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.3);color:#fff;padding:10px 24px;border-radius:var(--radius-pill);font-size:0.85rem;font-weight:600;transition:all 0.2s;}
+.role-btn:hover{background:rgba(255,255,255,0.25);}
+.role-card.client .role-btn{background:var(--gold);color:var(--dark);border-color:var(--gold);}
+
+/* FOOTER */
+footer{background:var(--dark);padding:50px 40px;color:rgba(255,255,255,0.7);}
+.footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:48px;}
+.footer-brand{font-size:1.2rem;font-weight:800;color:#fff;margin-bottom:12px;}
+.footer-brand span{color:var(--gold);}
+.footer-desc{font-size:0.85rem;line-height:1.7;}
+.footer-col h4{font-size:0.85rem;font-weight:700;color:#fff;margin-bottom:14px;}
+.footer-col ul{list-style:none;}
+.footer-col ul li{margin-bottom:10px;}
+.footer-col ul li a{font-size:0.82rem;color:rgba(255,255,255,0.6);transition:color 0.2s;}
+.footer-col ul li a:hover{color:var(--gold);}
+.footer-bottom{max-width:1200px;margin:30px auto 0;padding-top:20px;border-top:1px solid rgba(255,255,255,0.1);display:flex;justify-content:space-between;align-items:center;font-size:0.78rem;color:rgba(255,255,255,0.5);}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  nav{padding:0 20px;}
+  .nav-links{display:none;}
+  .hero{padding:90px 20px 50px;}
+  .hero-content{grid-template-columns:1fr;}
+  .hero h1{font-size:2.2rem;}
+  section{padding:60px 20px;}
+  .how-grid{grid-template-columns:1fr;}
+  .features-grid{grid-template-columns:1fr;}
+  .roles-grid{grid-template-columns:1fr;}
+  footer{padding:40px 20px;}
+  .footer-inner{grid-template-columns:1fr 1fr;}
+}
+@media(max-width:600px){.hero h1{font-size:1.8rem;} .section-h2{font-size:1.6rem;} .footer-inner{grid-template-columns:1fr;} .footer-bottom{flex-direction:column;gap:8px;text-align:center;}}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav>
+  <a href="index.html" class="logo">
+    <div class="logo-icon"><i class="fas fa-bolt"></i></div>
+    Loc'<span>Reaction</span>
+  </a>
+  <div class="nav-links">
+    <a href="#comment">Comment ça marche</a>
+    <a href="#fonctionnalites">Fonctionnalités</a>
+    <a href="#chauffeur">Devenir Chauffeur</a>
+  </div>
+  <div class="nav-cta">
+    <a href="auth/login.html" class="btn btn-outline">Se connecter</a>
+    <a href="auth/register.html" class="btn btn-primary">Inscription</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg-circle"></div>
+  <div class="hero-bg-circle"></div>
+  <div class="hero-content">
+    <div>
+      <div class="hero-badge"><i class="fas fa-star"></i> VTC Premium · France</div>
+      <h1>Votre chauffeur <span>privé premium</span> à portée de main</h1>
+      <p>Réservez une course en 3 clics. Transparence totale sur les tarifs, suivi en direct, portefeuille intégré. L'expérience VTC réinventée pour les exigeants.</p>
+      <div class="hero-btns">
+        <a href="auth/register.html?role=client" class="btn btn-gold btn-lg"><i class="fas fa-car"></i> Commander une course</a>
+        <a href="auth/register.html?role=chauffeur" class="btn btn-outline btn-lg" style="border-color:rgba(255,255,255,0.4);color:#fff;"><i class="fas fa-steering-wheel"></i> Devenir Chauffeur</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="val">4.9 ★</div><div class="lbl">Note moyenne</div></div>
+        <div class="hero-stat"><div class="val">500+</div><div class="lbl">Courses réalisées</div></div>
+        <div class="hero-stat"><div class="val">< 5min</div><div class="lbl">Attente moyenne</div></div>
+      </div>
+    </div>
+    <!-- Booking widget -->
+    <div class="hero-widget">
+      <div class="hw-title"><i class="fas fa-bolt"></i> Réserver une course</div>
+      <div class="hw-types">
+        <div class="hw-type active" onclick="setType(this,'immediat')">
+          <div class="hw-type-icon"><i class="fas fa-bolt"></i></div>
+          <div class="hw-type-label">Immédiate</div>
+        </div>
+        <div class="hw-type" onclick="setType(this,'programme')">
+          <div class="hw-type-icon"><i class="fas fa-calendar-alt"></i></div>
+          <div class="hw-type-label">Programmée</div>
+        </div>
+      </div>
+      <div class="hw-field">
+        <label class="hw-label">Point de départ</label>
+        <div class="hw-field-wrap"><i class="fas fa-map-marker-alt"></i><input class="hw-input" id="hw-depart" type="text" placeholder="Adresse de départ…"></div>
+      </div>
+      <div class="hw-separator"><div class="hw-dot"><i class="fas fa-exchange-alt"></i></div></div>
+      <div class="hw-field">
+        <label class="hw-label">Destination</label>
+        <div class="hw-field-wrap"><i class="fas fa-flag-checkered"></i><input class="hw-input" id="hw-arrivee" type="text" placeholder="Adresse d'arrivée…"></div>
+      </div>
+      <div id="hw-date-row" class="hw-field" style="display:none;">
+        <label class="hw-label">Date & Heure</label>
+        <div class="hw-field-wrap"><i class="fas fa-clock"></i><input class="hw-input" id="hw-date" type="datetime-local"></div>
+      </div>
+      <button class="hw-cta" onclick="handleBooking()"><i class="fas fa-search"></i> Estimer & Réserver</button>
+    </div>
+  </div>
+</section>
+
+<!-- COMMENT ÇA MARCHE -->
+<section id="comment">
+  <div class="section-inner">
+    <div class="section-tag"><i class="fas fa-route"></i> Simple & Rapide</div>
+    <h2 class="section-h2">En <span>3 étapes</span>, votre chauffeur arrive</h2>
+    <p class="section-sub">Zéro friction, zéro surprise. Reservez, suivez, arrivez.</p>
+    <div class="how-grid">
+      <div class="how-card">
+        <div class="how-num">1</div>
+        <div class="how-icon"><i class="fas fa-map-marked-alt"></i></div>
+        <h3 class="how-title">Entrez vos adresses</h3>
+        <p class="how-desc">Saisissez votre point de départ et votre destination. Notre algorithme calcule instantanément le prix et le temps d'arrivée estimé.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">2</div>
+        <div class="how-icon"><i class="fas fa-user-check"></i></div>
+        <h3 class="how-title">Un chauffeur accepte</h3>
+        <p class="how-desc">Votre demande est envoyée aux chauffeurs disponibles. Le premier qui accepte vous est assigné. Vous voyez son profil et sa note immédiatement.</p>
+      </div>
+      <div class="how-card">
+        <div class="how-num">3</div>
+        <div class="how-icon"><i class="fas fa-flag-checkered"></i></div>
+        <h3 class="how-title">Suivez & Arrivez</h3>
+        <p class="how-desc">Suivez votre chauffeur en temps réel sur la carte. Le paiement est automatique via votre portefeuille. Donnez votre note après la course.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FONCTIONNALITES -->
+<section id="fonctionnalites" class="features-bg">
+  <div class="section-inner">
+    <div class="section-tag"><i class="fas fa-star"></i> Ce qui nous différencie</div>
+    <h2 class="section-h2">Des fonctionnalités <span>pensées pour vous</span></h2>
+    <p class="section-sub">Tout ce que les grandes plateformes ne proposent pas.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon purple"><i class="fas fa-wallet"></i></div>
+        <div class="feature-content"><h3>Portefeuille intégré</h3><p>Rechargez votre compte via Stripe, Apple Pay ou carte bancaire. Payez sans sortir votre téléphone à chaque course.</p></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon gold"><i class="fas fa-heart"></i></div>
+        <div class="feature-content"><h3>Chauffeur favori</h3><p>Enregistrez votre chauffeur préféré. Invitez-le en priorité pour vos prochaines courses et bénéficiez d'un service personnalisé.</p></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon green"><i class="fas fa-satellite-dish"></i></div>
+        <div class="feature-content"><h3>Suivi en temps réel</h3><p>Carte interactive avec la position de votre chauffeur mise à jour toutes les 3 secondes. Partagez votre trajet avec vos proches.</p></div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon blue"><i class="fas fa-sliders-h"></i></div>
+        <div class="feature-content"><h3>Préférences de bord</h3><p>Notifiez vos préférences avant l'arrivée : température de l'habitacle, niveau de silence, type de musique. L'expérience sur mesure.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ROLES -->
+<section id="chauffeur">
+  <div class="section-inner">
+    <div class="section-tag"><i class="fas fa-users"></i> Espaces dédiés</div>
+    <h2 class="section-h2">Un espace pour <span>chaque profil</span></h2>
+    <p class="section-sub">Client, Chauffeur ou Administrateur — chacun dispose de son tableau de bord professionnel.</p>
+    <div class="roles-grid">
+      <div class="role-card client">
+        <div class="role-icon"><i class="fas fa-user"></i></div>
+        <div class="role-title">Espace Client</div>
+        <p class="role-desc">Réservez, suivez vos courses, gérez votre portefeuille et retrouvez l'historique de vos trajets.</p>
+        <a href="auth/login.html?role=client" class="role-btn"><i class="fas fa-arrow-right"></i> Accéder</a>
+      </div>
+      <div class="role-card driver">
+        <div class="role-icon"><i class="fas fa-car"></i></div>
+        <div class="role-title">Espace Chauffeur</div>
+        <p class="role-desc">Gérez vos invitations, suivez vos revenus et pilotez votre activité VTC comme un professionnel.</p>
+        <a href="auth/login.html?role=chauffeur" class="role-btn"><i class="fas fa-arrow-right"></i> Accéder</a>
+      </div>
+      <div class="role-card admin">
+        <div class="role-icon"><i class="fas fa-shield-alt"></i></div>
+        <div class="role-title">Administration</div>
+        <p class="role-desc">Gérez les utilisateurs, les tarifs, les transactions et supervisez l'ensemble de la plateforme.</p>
+        <a href="auth/login.html?role=admin" class="role-btn"><i class="fas fa-arrow-right"></i> Accéder</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <div class="footer-brand">⚡ Loc'<span>Reaction</span></div>
+      <p class="footer-desc">Solution VTC nouvelle génération. Confort, transparence et technologie au service de votre mobilité en France.</p>
+    </div>
+    <div class="footer-col">
+      <h4>Clients</h4>
+      <ul>
+        <li><a href="auth/register.html">Créer un compte</a></li>
+        <li><a href="client/dashboard.html">Réserver une course</a></li>
+        <li><a href="client/wallet.html">Mon Portefeuille</a></li>
+        <li><a href="client/history.html">Historique</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Chauffeurs</h4>
+      <ul>
+        <li><a href="auth/register.html?role=chauffeur">Rejoindre la flotte</a></li>
+        <li><a href="driver/dashboard.html">Mon Dashboard</a></li>
+        <li><a href="driver/earnings.html">Mes Revenus</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h4>Légal</h4>
+      <ul>
+        <li><a href="#">Mentions légales</a></li>
+        <li><a href="#">CGU</a></li>
+        <li><a href="#">Politique RGPD</a></li>
+        <li><a href="#">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <span>© 2025 Loc'Reaction · HubISoccer & Léonce R. Dossou-Yovo · Régine Gatibelza</span>
+    <span>Fait avec ❤️ en France 🇫🇷</span>
+  </div>
+</footer>
+
+<script src="assets/js/store.js"></script>
+<script>
+function setType(el, type) {
+  document.querySelectorAll('.hw-type').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('hw-date-row').style.display = type === 'programme' ? 'block' : 'none';
+}
+function handleBooking() {
+  const d = document.getElementById('hw-depart').value.trim();
+  const a = document.getElementById('hw-arrivee').value.trim();
+  if (!d || !a) { alert('Veuillez entrer un départ et une arrivée.'); return; }
+  const s = LR.getSession();
+  if (!s) { window.location.href = 'auth/login.html?redirect=client'; return; }
+  window.location.href = `client/dashboard.html?depart=${encodeURIComponent(d)}&arrivee=${encodeURIComponent(a)}`;
+}
+// Si déjà connecté, adapter les boutons
+window.addEventListener('DOMContentLoaded',()=>{
+  const s = LR.getSession();
+  if(s){
+    const navCta = document.querySelector('.nav-cta');
+    navCta.innerHTML = `<a href="javascript:LR.logout()" class="btn btn-outline">Déconnexion</a><a href="${LR._dashboardFor(s.role)}" class="btn btn-primary">Mon Dashboard</a>`;
+  }
+});
+</script>
+</body>
+</html>

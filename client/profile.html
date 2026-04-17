@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Profil | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.profile-hero{background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--radius-xl);padding:32px;margin-bottom:24px;display:flex;align-items:center;gap:28px;position:relative;overflow:hidden;}
+.profile-hero::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(255,204,0,0.08);}
+.profile-avatar-big{width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.15);border:4px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:var(--gold);flex-shrink:0;cursor:pointer;position:relative;}
+.avatar-edit-overlay{position:absolute;inset:0;border-radius:50%;background:rgba(0,0,0,0.5);display:none;align-items:center;justify-content:center;color:#fff;font-size:1.2rem;}
+.profile-avatar-big:hover .avatar-edit-overlay{display:flex;}
+.profile-hero-info{flex:1;}
+.profile-hero-name{font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:4px;}
+.profile-hero-email{font-size:0.85rem;color:rgba(255,255,255,0.75);margin-bottom:12px;}
+.profile-hero-badges{display:flex;gap:10px;flex-wrap:wrap;}
+.profile-hero-badge{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:#fff;padding:5px 14px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:600;display:flex;align-items:center;gap:6px;}
+.section-title-line{font-size:0.75rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.8px;padding-bottom:10px;border-bottom:2px solid var(--primary-xlight);margin-bottom:18px;display:flex;align-items:center;gap:8px;}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-xlight);}
+.info-row:last-child{border-bottom:none;}
+.info-label{font-size:0.8rem;color:var(--gray);display:flex;align-items:center;gap:8px;width:160px;flex-shrink:0;}
+.info-label i{width:18px;text-align:center;color:var(--primary);}
+.info-value{font-size:0.87rem;font-weight:600;color:var(--dark);flex:1;}
+.info-edit-btn{font-size:0.78rem;font-weight:600;color:var(--primary);cursor:pointer;padding:4px 10px;border-radius:var(--radius-sm);transition:background 0.15s;}
+.info-edit-btn:hover{background:var(--primary-xlight);}
+.danger-zone{background:var(--danger-light);border:1px solid rgba(231,76,60,0.2);border-radius:var(--radius-lg);padding:20px;}
+.danger-zone h3{font-size:0.9rem;font-weight:700;color:var(--danger);margin-bottom:8px;}
+.danger-zone p{font-size:0.82rem;color:var(--gray-dark);margin-bottom:16px;}
+</style>
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Mon Profil</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Client</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="profile-sidebar"><div class="profile-sidebar-avatar" id="sidebar-avatar">?</div><div class="profile-sidebar-name" id="sidebar-name">—</div><div class="profile-sidebar-role">Client VTC</div></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-home"></i> Réserver</a></li>
+        <li><a href="tracking.html"><i class="fas fa-map-marker-alt"></i> Suivi en direct</a></li>
+        <li><a href="wallet.html"><i class="fas fa-wallet"></i> Mon Portefeuille</a></li>
+        <li><a href="history.html"><i class="fas fa-history"></i> Historique</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Mon compte</div>
+      <ul class="sidebar-menu">
+        <li><a href="profile.html" class="active"><i class="fas fa-user-cog"></i> Profil</a></li>
+        <li><a href="favorites.html"><i class="fas fa-heart"></i> Chauffeurs favoris</a></li>
+        <li><a href="preferences.html"><i class="fas fa-sliders-h"></i> Préférences</a></li>
+        <li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <!-- Profile hero -->
+    <div class="profile-hero">
+      <div class="profile-avatar-big" id="big-avatar">
+        <span id="big-avatar-text">?</span>
+        <div class="avatar-edit-overlay"><i class="fas fa-camera"></i></div>
+      </div>
+      <div class="profile-hero-info">
+        <div class="profile-hero-name" id="hero-name">—</div>
+        <div class="profile-hero-email" id="hero-email">—</div>
+        <div class="profile-hero-badges">
+          <div class="profile-hero-badge"><i class="fas fa-user-check"></i> Compte vérifié</div>
+          <div class="profile-hero-badge"><i class="fas fa-shield-alt"></i> RGPD conforme</div>
+          <div class="profile-hero-badge" id="hero-courses-badge"><i class="fas fa-route"></i> 0 courses</div>
+        </div>
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="toggleEdit()"><i class="fas fa-edit"></i> Modifier</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <!-- Informations personnelles -->
+      <div class="card">
+        <div class="section-title-line"><i class="fas fa-user"></i> Informations personnelles</div>
+
+        <!-- View mode -->
+        <div id="view-mode">
+          <div class="info-row"><div class="info-label"><i class="fas fa-user"></i> Prénom</div><div class="info-value" id="v-prenom">—</div></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-user"></i> Nom</div><div class="info-value" id="v-nom">—</div></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-envelope"></i> Email</div><div class="info-value" id="v-email">—</div></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-phone"></i> Téléphone</div><div class="info-value" id="v-tel">—</div></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-city"></i> Ville</div><div class="info-value" id="v-ville">—</div></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-calendar"></i> Inscrit le</div><div class="info-value" id="v-date">—</div></div>
+        </div>
+
+        <!-- Edit mode -->
+        <div id="edit-mode" style="display:none;">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Prénom</label><div class="form-icon-wrap"><i class="fas fa-user"></i><input type="text" id="e-prenom" class="form-control" style="padding-left:44px;"></div></div>
+            <div class="form-group"><label class="form-label">Nom</label><div class="form-icon-wrap"><i class="fas fa-user"></i><input type="text" id="e-nom" class="form-control" style="padding-left:44px;"></div></div>
+          </div>
+          <div class="form-group"><label class="form-label">Téléphone</label><div class="form-icon-wrap"><i class="fas fa-phone"></i><input type="tel" id="e-tel" class="form-control" style="padding-left:44px;"></div></div>
+          <div class="form-group"><label class="form-label">Ville</label><div class="form-icon-wrap"><i class="fas fa-city"></i><input type="text" id="e-ville" class="form-control" style="padding-left:44px;"></div></div>
+          <div style="display:flex;gap:10px;">
+            <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Enregistrer</button>
+            <button class="btn btn-outline-gray" onclick="toggleEdit()">Annuler</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sécurité + Statistiques -->
+      <div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="section-title-line"><i class="fas fa-lock"></i> Sécurité</div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-key"></i> Mot de passe</div><div class="info-value">••••••••</div><span class="info-edit-btn" onclick="openChangePwd()">Modifier</span></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-shield-alt"></i> Double auth</div><div class="info-value">Non activée</div><span class="info-edit-btn" onclick="showToast('Bientôt disponible !','info')">Activer</span></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-calendar-check"></i> Dernière co.</div><div class="info-value" id="v-last-login">Aujourd'hui</div></div>
+        </div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="section-title-line"><i class="fas fa-chart-bar"></i> Mes statistiques</div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-route"></i> Courses total</div><div class="info-value" id="stat-total-rides">0</div></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-road"></i> KM parcourus</div><div class="info-value" id="stat-km">0 km</div></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-euro-sign"></i> Total dépensé</div><div class="info-value" id="stat-depense">0 €</div></div>
+          <div class="info-row"><div class="info-label"><i class="fas fa-star"></i> Ma note moy.</div><div class="info-value" id="stat-note">— ★</div></div>
+        </div>
+        <div class="danger-zone">
+          <h3><i class="fas fa-exclamation-triangle"></i> Zone dangereuse</h3>
+          <p>La suppression de votre compte est définitive et entraîne la perte de toutes vos données et de votre solde.</p>
+          <button class="btn btn-danger btn-sm" onclick="confirmDeleteAccount()"><i class="fas fa-trash-alt"></i> Supprimer mon compte</button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Change password modal -->
+<div class="modal-overlay" id="pwd-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title"><i class="fas fa-lock" style="color:var(--primary);margin-right:8px;"></i>Changer le mot de passe</div><button class="modal-close" onclick="document.getElementById('pwd-modal').classList.remove('open')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-group"><label class="form-label">Mot de passe actuel</label><div class="form-icon-wrap"><i class="fas fa-lock"></i><input type="password" id="pwd-old" class="form-control" style="padding-left:44px;" placeholder="••••••••"></div></div>
+      <div class="form-group"><label class="form-label">Nouveau mot de passe</label><div class="form-icon-wrap"><i class="fas fa-lock"></i><input type="password" id="pwd-new" class="form-control" style="padding-left:44px;" placeholder="Min. 6 caractères"></div></div>
+      <div class="form-group"><label class="form-label">Confirmer</label><div class="form-icon-wrap"><i class="fas fa-lock"></i><input type="password" id="pwd-confirm" class="form-control" style="padding-left:44px;" placeholder="Répétez le nouveau MDP"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-gray" onclick="document.getElementById('pwd-modal').classList.remove('open')">Annuler</button>
+      <button class="btn btn-primary" onclick="changePwd()"><i class="fas fa-save"></i> Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, user;
+window.addEventListener('DOMContentLoaded', () => {
+  session = LR.requireAuth('client'); if (!session) return;
+  user = LR.getUserById(session.userId);
+  fillProfile();
+  loadStats();
+  hideLoader();
+});
+
+function fillProfile() {
+  document.getElementById('nav-avatar').textContent = session.avatar;
+  document.getElementById('nav-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent = session.avatar;
+  document.getElementById('sidebar-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('big-avatar-text').textContent = user.avatar || '?';
+  document.getElementById('hero-name').textContent = `${user.prenom} ${user.nom}`;
+  document.getElementById('hero-email').textContent = user.email;
+  document.getElementById('v-prenom').textContent = user.prenom;
+  document.getElementById('v-nom').textContent = user.nom;
+  document.getElementById('v-email').textContent = user.email;
+  document.getElementById('v-tel').textContent = user.tel || 'Non renseigné';
+  document.getElementById('v-ville').textContent = user.ville || 'Non renseignée';
+  document.getElementById('v-date').textContent = formatDate(user.createdAt);
+  document.getElementById('e-prenom').value = user.prenom;
+  document.getElementById('e-nom').value = user.nom;
+  document.getElementById('e-tel').value = user.tel || '';
+  document.getElementById('e-ville').value = user.ville || '';
+}
+
+function loadStats() {
+  const rides = LR.getRides().filter(r => r.clientId === session.userId && r.statut === 'termine');
+  const km = rides.reduce((s, r) => s + (r.distance || 0), 0);
+  const depense = rides.reduce((s, r) => s + r.prix, 0);
+  const notes = rides.filter(r => r.noteChauffeur).map(r => r.noteChauffeur);
+  document.getElementById('stat-total-rides').textContent = rides.length;
+  document.getElementById('stat-km').textContent = km.toFixed(1) + ' km';
+  document.getElementById('stat-depense').textContent = depense.toFixed(2) + ' €';
+  document.getElementById('stat-note').textContent = notes.length ? (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(1) + ' ★' : '— ★';
+  document.getElementById('hero-courses-badge').innerHTML = `<i class="fas fa-route"></i> ${rides.length} courses`;
+}
+
+let editing = false;
+function toggleEdit() {
+  editing = !editing;
+  document.getElementById('view-mode').style.display = editing ? 'none' : 'block';
+  document.getElementById('edit-mode').style.display = editing ? 'block' : 'none';
+}
+
+function saveProfile() {
+  const prenom = document.getElementById('e-prenom').value.trim();
+  const nom = document.getElementById('e-nom').value.trim();
+  const tel = document.getElementById('e-tel').value.trim();
+  const ville = document.getElementById('e-ville').value.trim();
+  if (!prenom || !nom) { showToast('Prénom et Nom obligatoires.', 'warning'); return; }
+  LR.updateUser(session.userId, { prenom, nom, tel, ville, avatar: prenom[0] + nom[0] });
+  user = LR.getUserById(session.userId);
+  const newSession = { ...LR.getSession(), prenom, nom, avatar: prenom[0] + nom[0] };
+  sessionStorage.setItem(LR.KEYS.SESSION, JSON.stringify(newSession));
+  fillProfile();
+  toggleEdit();
+  showToast('Profil mis à jour avec succès !', 'success');
+}
+
+function openChangePwd() { document.getElementById('pwd-modal').classList.add('open'); }
+function changePwd() {
+  const old = document.getElementById('pwd-old').value;
+  const nw = document.getElementById('pwd-new').value;
+  const conf = document.getElementById('pwd-confirm').value;
+  if (old !== user.password) { showToast('Mot de passe actuel incorrect.', 'error'); return; }
+  if (nw.length < 6) { showToast('Minimum 6 caractères.', 'warning'); return; }
+  if (nw !== conf) { showToast('Les mots de passe ne correspondent pas.', 'error'); return; }
+  LR.updateUser(session.userId, { password: nw });
+  document.getElementById('pwd-modal').classList.remove('open');
+  showToast('Mot de passe changé !', 'success');
+}
+
+function confirmDeleteAccount() {
+  if (confirm('⚠️ ATTENTION : Cette action est irréversible. Supprimer votre compte ?')) {
+    showToast('Compte supprimé. Au revoir !', 'warning');
+    setTimeout(() => { LR.logout(); }, 2000);
+  }
+}
+</script>
+</body>
+</html>

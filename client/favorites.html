@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Chauffeurs Favoris | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.driver-card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;}
+.driver-fav-card{background:var(--white);border:1px solid var(--gray-light);border-radius:var(--radius-xl);padding:24px;box-shadow:var(--shadow-sm);transition:all 0.3s;position:relative;}
+.driver-fav-card:hover{box-shadow:var(--shadow-md);transform:translateY(-3px);}
+.driver-fav-card.favorite{border-color:var(--gold);box-shadow:0 4px 20px rgba(255,204,0,0.2);}
+.dfav-header{display:flex;align-items:center;gap:14px;margin-bottom:16px;}
+.dfav-avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:1.2rem;font-weight:800;color:var(--white);border:2px solid var(--gold);flex-shrink:0;}
+.dfav-name{font-size:1rem;font-weight:700;color:var(--dark);}
+.dfav-car{font-size:0.78rem;color:var(--gray);margin-top:2px;}
+.dfav-note{display:flex;align-items:center;gap:4px;margin-top:4px;font-size:0.82rem;font-weight:700;color:var(--gold-dark);}
+.dfav-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px;}
+.dfav-stat{background:var(--gray-xlight);border-radius:var(--radius);padding:10px;text-align:center;}
+.dfav-stat .val{font-size:1rem;font-weight:800;color:var(--primary);}
+.dfav-stat .lbl{font-size:0.65rem;color:var(--gray);margin-top:2px;}
+.dfav-tags{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px;}
+.dfav-actions{display:flex;gap:8px;}
+.fav-heart{position:absolute;top:16px;right:16px;font-size:1.2rem;color:var(--gray-light);cursor:pointer;transition:all 0.2s;}
+.fav-heart.active{color:var(--danger);}
+.fav-heart:hover{color:var(--danger);transform:scale(1.2);}
+.all-drivers-section{margin-top:32px;}
+.online-badge{width:12px;height:12px;border-radius:50%;background:var(--success);border:2px solid var(--white);position:absolute;bottom:2px;right:2px;}
+</style>
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Chauffeurs Favoris</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Client</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="profile-sidebar"><div class="profile-sidebar-avatar" id="sidebar-avatar">?</div><div class="profile-sidebar-name" id="sidebar-name">—</div><div class="profile-sidebar-role">Client VTC</div></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-home"></i> Réserver</a></li>
+        <li><a href="tracking.html"><i class="fas fa-map-marker-alt"></i> Suivi en direct</a></li>
+        <li><a href="wallet.html"><i class="fas fa-wallet"></i> Mon Portefeuille</a></li>
+        <li><a href="history.html"><i class="fas fa-history"></i> Historique</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Mon compte</div>
+      <ul class="sidebar-menu">
+        <li><a href="profile.html"><i class="fas fa-user-cog"></i> Profil</a></li>
+        <li><a href="favorites.html" class="active"><i class="fas fa-heart"></i> Chauffeurs favoris</a></li>
+        <li><a href="preferences.html"><i class="fas fa-sliders-h"></i> Préférences</a></li>
+        <li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon red"><i class="fas fa-heart"></i></div><div><div class="stat-value" id="s-favs">0</div><div class="stat-label">Favoris</div></div></div>
+      <div class="stat-card"><div class="stat-icon green"><i class="fas fa-circle"></i></div><div><div class="stat-value" id="s-online">0</div><div class="stat-label">En ligne maintenant</div></div></div>
+      <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-route"></i></div><div><div class="stat-value" id="s-courses-with">0</div><div class="stat-label">Courses avec favoris</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-star"></i></div><div><div class="stat-value" id="s-avg-note">—</div><div class="stat-label">Note moy. favoris</div></div></div>
+    </div>
+
+    <!-- Mes favoris -->
+    <div class="section-header"><div class="section-title"><i class="fas fa-heart"></i> Mes chauffeurs favoris</div></div>
+    <div class="driver-card-grid" id="favs-grid"></div>
+    <div class="empty-state" id="favs-empty" style="display:none;padding:40px;text-align:center;">
+      <i class="fas fa-heart" style="font-size:3rem;color:var(--gray-light);margin-bottom:16px;"></i>
+      <h3 style="color:var(--gray);">Aucun favori pour l'instant</h3>
+      <p style="color:var(--gray);">Ajoutez des chauffeurs en cliquant sur ❤️ lors de vos courses.</p>
+    </div>
+
+    <!-- Tous les chauffeurs -->
+    <div class="all-drivers-section">
+      <div class="section-header"><div class="section-title"><i class="fas fa-users"></i> Tous les chauffeurs disponibles</div></div>
+      <div class="driver-card-grid" id="all-drivers-grid"></div>
+    </div>
+  </main>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, favorites = [];
+const FAVS_KEY = 'lr_favorites_';
+
+window.addEventListener('DOMContentLoaded', () => {
+  session = LR.requireAuth('client'); if (!session) return;
+  document.getElementById('nav-avatar').textContent = session.avatar;
+  document.getElementById('nav-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent = session.avatar;
+  document.getElementById('sidebar-name').textContent = `${session.prenom} ${session.nom}`;
+
+  favorites = JSON.parse(localStorage.getItem(FAVS_KEY + session.userId) || '[]');
+  loadDrivers();
+  hideLoader();
+});
+
+function loadDrivers() {
+  const drivers = LR.getUsers().filter(u => u.role === 'chauffeur');
+  const favsDrivers = drivers.filter(d => favorites.includes(d.id));
+  const onlineDrivers = drivers.filter(d => d.disponible);
+
+  document.getElementById('s-favs').textContent = favsDrivers.length;
+  document.getElementById('s-online').textContent = onlineDrivers.length;
+
+  const favsRides = LR.getRides().filter(r => r.clientId === session.userId && favorites.includes(r.chauffeurId));
+  document.getElementById('s-courses-with').textContent = favsRides.length;
+
+  const notes = favsDrivers.map(d => d.note).filter(Boolean);
+  document.getElementById('s-avg-note').textContent = notes.length ? (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(1) + '★' : '—';
+
+  // Render favs
+  const favsGrid = document.getElementById('favs-grid');
+  if (!favsDrivers.length) {
+    favsGrid.style.display = 'none';
+    document.getElementById('favs-empty').style.display = 'block';
+  } else {
+    document.getElementById('favs-empty').style.display = 'none';
+    favsGrid.innerHTML = favsDrivers.map(d => driverCard(d, true)).join('');
+  }
+
+  // Render all
+  document.getElementById('all-drivers-grid').innerHTML = drivers.map(d => driverCard(d, favorites.includes(d.id))).join('');
+}
+
+function driverCard(d, isFav) {
+  const myRidesWithDriver = LR.getRides().filter(r => r.clientId === session.userId && r.chauffeurId === d.id && r.statut === 'termine');
+  const tags = [
+    d.disponible ? '<span class="badge badge-success">En ligne</span>' : '<span class="badge badge-gray">Hors ligne</span>',
+    d.note >= 4.8 ? '<span class="badge badge-gold">⭐ Top chauffeur</span>' : '',
+    myRidesWithDriver.length > 0 ? `<span class="badge badge-primary">${myRidesWithDriver.length} course${myRidesWithDriver.length > 1 ? 's' : ''} ensemble</span>` : '',
+  ].filter(Boolean).join('');
+
+  return `<div class="driver-fav-card ${isFav ? 'favorite' : ''}">
+    <i class="fas fa-heart fav-heart ${isFav ? 'active' : ''}" onclick="toggleFav('${d.id}', this)" title="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}"></i>
+    <div class="dfav-header">
+      <div style="position:relative;">
+        <div class="dfav-avatar">${d.avatar || '?'}</div>
+        ${d.disponible ? '<div class="online-badge"></div>' : ''}
+      </div>
+      <div>
+        <div class="dfav-name">${d.prenom} ${d.nom}</div>
+        <div class="dfav-car">${d.voiture || 'Véhicule non renseigné'}</div>
+        <div class="dfav-note"><i class="fas fa-star"></i> ${d.note || '5.0'} (${d.coursesTotal || 0} courses)</div>
+      </div>
+    </div>
+    <div class="dfav-stats">
+      <div class="dfav-stat"><div class="val">${d.note || '5.0'}★</div><div class="lbl">Note</div></div>
+      <div class="dfav-stat"><div class="val">${d.coursesTotal || 0}</div><div class="lbl">Courses</div></div>
+      <div class="dfav-stat"><div class="val">${myRidesWithDriver.length}</div><div class="lbl">Ensemble</div></div>
+    </div>
+    <div class="dfav-tags">${tags}</div>
+    <div class="dfav-actions">
+      <button class="btn btn-primary btn-sm" style="flex:1;" onclick="bookWithDriver('${d.id}','${d.prenom} ${d.nom}')">
+        <i class="fas fa-bolt"></i> Commander
+      </button>
+      ${isFav ? `<button class="btn btn-danger btn-sm" onclick="toggleFav('${d.id}', null)"><i class="fas fa-heart-broken"></i></button>` : `<button class="btn btn-outline btn-sm" onclick="toggleFav('${d.id}', null)"><i class="fas fa-heart"></i></button>`}
+    </div>
+  </div>`;
+}
+
+function toggleFav(driverId, heartEl) {
+  const idx = favorites.indexOf(driverId);
+  if (idx === -1) { favorites.push(driverId); showToast('Ajouté aux favoris ❤️', 'success'); }
+  else { favorites.splice(idx, 1); showToast('Retiré des favoris.', 'warning'); }
+  localStorage.setItem(FAVS_KEY + session.userId, JSON.stringify(favorites));
+  loadDrivers();
+}
+
+function bookWithDriver(driverId, name) {
+  showToast(`Redirection vers la réservation avec ${name}…`, 'info');
+  setTimeout(() => window.location.href = `dashboard.html?chauffeur=${driverId}`, 1000);
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Profil Chauffeur | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.driver-profile-hero{background:linear-gradient(135deg,#1a1a2e,#2d2d4e);border-radius:var(--radius-xl);padding:32px;margin-bottom:24px;display:flex;align-items:center;gap:28px;position:relative;overflow:hidden;}
+.driver-profile-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:220px;height:220px;border-radius:50%;background:rgba(255,204,0,0.07);}
+.drv-avatar-hero{width:90px;height:90px;border-radius:50%;background:rgba(255,255,255,0.1);border:4px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:2rem;font-weight:800;color:var(--gold);flex-shrink:0;}
+.drv-hero-info .name{font-size:1.5rem;font-weight:800;color:#fff;margin-bottom:4px;}
+.drv-hero-info .car{font-size:0.88rem;color:rgba(255,255,255,0.7);margin-bottom:10px;}
+.drv-hero-stats{display:flex;gap:20px;}
+.drv-hero-stat{text-align:center;}
+.drv-hero-stat .val{font-size:1.3rem;font-weight:800;color:var(--gold);}
+.drv-hero-stat .lbl{font-size:0.68rem;color:rgba(255,255,255,0.6);}
+.doc-card{background:var(--gray-xlight);border:1px solid var(--gray-light);border-radius:var(--radius-lg);padding:16px;display:flex;align-items:center;gap:14px;transition:all 0.2s;}
+.doc-card:hover{border-color:var(--primary);}
+.doc-icon{width:44px;height:44px;border-radius:var(--radius);display:flex;align-items:center;justify-content:center;font-size:1.1rem;flex-shrink:0;}
+.doc-icon.valid{background:var(--success-light);color:var(--success);}
+.doc-icon.expiring{background:var(--warning-light);color:var(--warning);}
+.doc-icon.expired{background:var(--danger-light);color:var(--danger);}
+.doc-name{font-size:0.87rem;font-weight:600;color:var(--dark);}
+.doc-date{font-size:0.73rem;color:var(--gray);margin-top:2px;}
+.review-item{padding:14px 0;border-bottom:1px solid var(--gray-xlight);}
+.review-item:last-child{border-bottom:none;}
+.review-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.review-client{font-size:0.85rem;font-weight:600;}
+.review-stars{color:var(--gold);}
+.review-date{font-size:0.72rem;color:var(--gray);}
+.review-comment{font-size:0.83rem;color:var(--gray-dark);font-style:italic;}
+</style>
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Mon Profil Chauffeur</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Chauffeur</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="profile-sidebar" style="background:linear-gradient(135deg,#1a1a2e,#2d2d4e);">
+      <div class="profile-sidebar-avatar" id="sidebar-avatar" style="border-color:var(--gold);">?</div>
+      <div class="profile-sidebar-name" id="sidebar-name">—</div>
+      <div class="profile-sidebar-role" style="color:var(--gold);">Chauffeur VTC</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a></li>
+        <li><a href="earnings.html"><i class="fas fa-chart-line"></i> Mes Revenus</a></li>
+        <li><a href="driver-profile.html" class="active"><i class="fas fa-user-cog"></i> Mon Profil</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><ul class="sidebar-menu"><li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li></ul></div>
+  </aside>
+
+  <main class="main-content">
+    <!-- Hero -->
+    <div class="driver-profile-hero">
+      <div class="drv-avatar-hero" id="hero-avatar">?</div>
+      <div class="drv-hero-info" style="flex:1;">
+        <div class="name" id="hero-name">—</div>
+        <div class="car" id="hero-car">—</div>
+        <div class="drv-hero-stats">
+          <div class="drv-hero-stat"><div class="val" id="hs-courses">0</div><div class="lbl">Courses</div></div>
+          <div class="drv-hero-stat"><div class="val" id="hs-note">5.0★</div><div class="lbl">Note</div></div>
+          <div class="drv-hero-stat"><div class="val" id="hs-km">0</div><div class="lbl">km parcourus</div></div>
+          <div class="drv-hero-stat"><div class="val" id="hs-revenu">0€</div><div class="lbl">CA total</div></div>
+        </div>
+      </div>
+      <button class="btn btn-gold btn-sm" onclick="toggleEdit()"><i class="fas fa-edit"></i> Modifier</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <!-- Infos perso + véhicule -->
+      <div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header"><div class="card-title"><i class="fas fa-id-card" style="color:var(--primary);margin-right:8px;"></i>Informations personnelles</div></div>
+          <div id="view-mode">
+            <div style="display:flex;flex-direction:column;gap:0;">
+              <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gray-xlight);font-size:0.87rem;"><span style="color:var(--gray);">Prénom Nom</span><span style="font-weight:600;" id="v-fullname">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gray-xlight);font-size:0.87rem;"><span style="color:var(--gray);">Email</span><span style="font-weight:600;" id="v-email">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gray-xlight);font-size:0.87rem;"><span style="color:var(--gray);">Téléphone</span><span style="font-weight:600;" id="v-tel">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gray-xlight);font-size:0.87rem;"><span style="color:var(--gray);">Véhicule</span><span style="font-weight:600;" id="v-voiture">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--gray-xlight);font-size:0.87rem;"><span style="color:var(--gray);">Plaque</span><span style="font-weight:600;" id="v-plaque">—</span></div>
+              <div style="display:flex;justify-content:space-between;padding:11px 0;font-size:0.87rem;"><span style="color:var(--gray);">Inscription</span><span style="font-weight:600;" id="v-date">—</span></div>
+            </div>
+          </div>
+          <div id="edit-mode" style="display:none;">
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Prénom</label><div class="form-icon-wrap"><i class="fas fa-user"></i><input type="text" id="e-prenom" class="form-control" style="padding-left:44px;"></div></div>
+              <div class="form-group"><label class="form-label">Nom</label><div class="form-icon-wrap"><i class="fas fa-user"></i><input type="text" id="e-nom" class="form-control" style="padding-left:44px;"></div></div>
+            </div>
+            <div class="form-group"><label class="form-label">Téléphone</label><div class="form-icon-wrap"><i class="fas fa-phone"></i><input type="tel" id="e-tel" class="form-control" style="padding-left:44px;"></div></div>
+            <div class="form-group"><label class="form-label">Véhicule (Marque + Modèle)</label><div class="form-icon-wrap"><i class="fas fa-car"></i><input type="text" id="e-voiture" class="form-control" style="padding-left:44px;"></div></div>
+            <div class="form-group"><label class="form-label">Plaque d'immatriculation</label><div class="form-icon-wrap"><i class="fas fa-id-card"></i><input type="text" id="e-plaque" class="form-control" style="padding-left:44px;"></div></div>
+            <div style="display:flex;gap:10px;">
+              <button class="btn btn-primary" onclick="saveProfile()"><i class="fas fa-save"></i> Enregistrer</button>
+              <button class="btn btn-outline-gray" onclick="toggleEdit()">Annuler</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Documents -->
+        <div class="card">
+          <div class="card-header"><div class="card-title"><i class="fas fa-file-alt" style="color:var(--primary);margin-right:8px;"></i>Documents & validité</div></div>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div class="doc-card"><div class="doc-icon valid"><i class="fas fa-id-card"></i></div><div style="flex:1;"><div class="doc-name">Carte VTC professionnelle</div><div class="doc-date">Expire le 31/12/2026 <span class="badge badge-success" style="margin-left:8px;">Valide</span></div></div></div>
+            <div class="doc-card"><div class="doc-icon valid"><i class="fas fa-car"></i></div><div style="flex:1;"><div class="doc-name">Certificat d'immatriculation</div><div class="doc-date">Expire le 15/06/2026 <span class="badge badge-success" style="margin-left:8px;">Valide</span></div></div></div>
+            <div class="doc-card"><div class="doc-icon expiring"><i class="fas fa-shield-alt"></i></div><div style="flex:1;"><div class="doc-name">Assurance professionnelle</div><div class="doc-date">Expire le 30/06/2025 <span class="badge badge-warning" style="margin-left:8px;">Expire bientôt</span></div></div></div>
+            <div class="doc-card"><div class="doc-icon valid"><i class="fas fa-user-check"></i></div><div style="flex:1;"><div class="doc-name">Permis de conduire B</div><div class="doc-date">Expire le 22/03/2035 <span class="badge badge-success" style="margin-left:8px;">Valide</span></div></div></div>
+          </div>
+          <button class="btn btn-outline btn-sm" style="margin-top:16px;width:100%;" onclick="showToast('Téléchargement de documents bientôt disponible !','info')"><i class="fas fa-upload"></i> Mettre à jour un document</button>
+        </div>
+      </div>
+
+      <!-- Avis clients -->
+      <div>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-header"><div class="card-title"><i class="fas fa-star" style="color:var(--gold-dark);margin-right:8px;"></i>Avis de mes clients</div></div>
+          <div style="text-align:center;padding:16px 0;margin-bottom:16px;background:var(--primary-xlight);border-radius:var(--radius-lg);">
+            <div style="font-size:3rem;font-weight:900;color:var(--primary);" id="big-note">4.9</div>
+            <div style="color:var(--gold);font-size:1.4rem;letter-spacing:4px;">★★★★★</div>
+            <div style="font-size:0.82rem;color:var(--gray);margin-top:4px;" id="nb-avis">sur 0 avis</div>
+          </div>
+          <!-- Note bars -->
+          <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;" id="note-bars"></div>
+          <!-- Avis list -->
+          <div id="reviews-list"></div>
+          <div class="empty-state" id="reviews-empty" style="display:none;padding:24px;"><i class="fas fa-comment-slash"></i><p>Aucun avis pour l'instant.</p></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, user;
+window.addEventListener('DOMContentLoaded', () => {
+  session = LR.requireAuth('chauffeur'); if (!session) return;
+  user = LR.getUserById(session.userId);
+  fillProfile();
+  loadStats();
+  loadReviews();
+  hideLoader();
+});
+
+function fillProfile() {
+  document.getElementById('nav-avatar').textContent = session.avatar;
+  document.getElementById('nav-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent = session.avatar;
+  document.getElementById('sidebar-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('hero-avatar').textContent = user.avatar || '?';
+  document.getElementById('hero-name').textContent = `${user.prenom} ${user.nom}`;
+  document.getElementById('hero-car').textContent = `${user.voiture || '—'} · ${user.plaque || '—'}`;
+  document.getElementById('v-fullname').textContent = `${user.prenom} ${user.nom}`;
+  document.getElementById('v-email').textContent = user.email;
+  document.getElementById('v-tel').textContent = user.tel || '—';
+  document.getElementById('v-voiture').textContent = user.voiture || '—';
+  document.getElementById('v-plaque').textContent = user.plaque || '—';
+  document.getElementById('v-date').textContent = formatDate(user.createdAt);
+  document.getElementById('e-prenom').value = user.prenom;
+  document.getElementById('e-nom').value = user.nom;
+  document.getElementById('e-tel').value = user.tel || '';
+  document.getElementById('e-voiture').value = user.voiture || '';
+  document.getElementById('e-plaque').value = user.plaque || '';
+}
+
+function loadStats() {
+  const rides = LR.getRides().filter(r => r.chauffeurId === session.userId && r.statut === 'termine');
+  const km = rides.reduce((s, r) => s + (r.distance || 0), 0);
+  const revenu = rides.reduce((s, r) => s + r.prix, 0);
+  document.getElementById('hs-courses').textContent = rides.length;
+  document.getElementById('hs-note').textContent = (user.note || 5.0) + '★';
+  document.getElementById('hs-km').textContent = km.toFixed(0);
+  document.getElementById('hs-revenu').textContent = revenu.toFixed(0) + '€';
+}
+
+function loadReviews() {
+  const rides = LR.getRides().filter(r => r.chauffeurId === session.userId && r.statut === 'termine' && r.noteClient);
+  const notes = rides.map(r => r.noteClient);
+  if (!notes.length) { document.getElementById('reviews-empty').style.display = 'block'; document.getElementById('note-bars').innerHTML = ''; return; }
+  const avg = (notes.reduce((a, b) => a + b, 0) / notes.length).toFixed(1);
+  document.getElementById('big-note').textContent = avg;
+  document.getElementById('nb-avis').textContent = `sur ${notes.length} avis`;
+  // Bars per star
+  const bars = document.getElementById('note-bars');
+  bars.innerHTML = [5, 4, 3, 2, 1].map(n => {
+    const count = notes.filter(x => x === n).length;
+    const pct = notes.length ? (count / notes.length * 100).toFixed(0) : 0;
+    return `<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:0.8rem;font-weight:600;width:20px;color:var(--gold-dark);">${n}★</span><div style="flex:1;height:6px;background:var(--gray-light);border-radius:var(--radius-pill);overflow:hidden;"><div style="width:${pct}%;height:100%;background:var(--gold);border-radius:var(--radius-pill);"></div></div><span style="font-size:0.75rem;color:var(--gray);width:28px;">${count}</span></div>`;
+  }).join('');
+  // Reviews list
+  const reviewsEl = document.getElementById('reviews-list');
+  const mockComments = ['Excellent chauffeur, très ponctuel !', 'Trajet agréable, véhicule propre.', 'Je recommande vivement.', 'Très professionnel et sympathique.', 'Course parfaite, merci !'];
+  reviewsEl.innerHTML = rides.slice(0, 5).map((r, i) => {
+    const client = LR.getUserById(r.clientId);
+    return `<div class="review-item">
+      <div class="review-header">
+        <span class="review-client">${client ? `${client.prenom} ${client.nom}` : 'Client anonyme'}</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="review-stars">${'★'.repeat(r.noteClient)}${'☆'.repeat(5 - r.noteClient)}</span>
+          <span class="review-date">${formatDate(r.date)}</span>
+        </div>
+      </div>
+      <div class="review-comment">"${mockComments[i % mockComments.length]}"</div>
+    </div>`;
+  }).join('');
+}
+
+let editing = false;
+function toggleEdit() {
+  editing = !editing;
+  document.getElementById('view-mode').style.display = editing ? 'none' : 'block';
+  document.getElementById('edit-mode').style.display = editing ? 'block' : 'none';
+}
+function saveProfile() {
+  const prenom = document.getElementById('e-prenom').value.trim();
+  const nom = document.getElementById('e-nom').value.trim();
+  if (!prenom || !nom) { showToast('Prénom et Nom obligatoires.', 'warning'); return; }
+  LR.updateUser(session.userId, { prenom, nom, tel: document.getElementById('e-tel').value, voiture: document.getElementById('e-voiture').value, plaque: document.getElementById('e-plaque').value, avatar: prenom[0] + nom[0] });
+  user = LR.getUserById(session.userId);
+  fillProfile(); toggleEdit();
+  showToast('Profil mis à jour !', 'success');
+}
+</script>
+</body>
+</html>

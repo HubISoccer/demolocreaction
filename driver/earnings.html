@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mes Revenus | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Mes Revenus</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Chauffeur</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="profile-sidebar"><div class="profile-sidebar-avatar" id="sidebar-avatar">?</div><div class="profile-sidebar-name" id="sidebar-name">—</div><div class="profile-sidebar-role">Chauffeur VTC</div></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a></li>
+        <li><a href="earnings.html" class="active"><i class="fas fa-chart-line"></i> Mes Revenus</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><ul class="sidebar-menu"><li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li></ul></div>
+  </aside>
+  <main class="main-content">
+    <!-- Hero revenue card -->
+    <div class="wallet-card" style="margin-bottom:24px;">
+      <div class="wallet-label"><i class="fas fa-chart-line" style="margin-right:6px;"></i>Revenus totaux</div>
+      <div style="display:flex;align-items:baseline;gap:8px;">
+        <div class="wallet-balance" id="total-revenus">0,00</div>
+        <div class="wallet-currency">EUR</div>
+      </div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-top:6px;" id="total-courses-label">0 courses réalisées</div>
+      <div class="wallet-actions">
+        <div style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.2);border-radius:var(--radius);padding:10px 16px;font-size:0.82rem;color:rgba(255,255,255,0.8);">
+          <i class="fas fa-star" style="color:var(--gold);margin-right:6px;"></i>Note moyenne : <strong id="note-avg" style="color:var(--gold);">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon green"><i class="fas fa-euro-sign"></i></div><div><div class="stat-value" id="s-today">0€</div><div class="stat-label">Aujourd'hui</div></div></div>
+      <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-calendar-week"></i></div><div><div class="stat-value" id="s-week">0€</div><div class="stat-label">Cette semaine</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-calendar-alt"></i></div><div><div class="stat-value" id="s-month">0€</div><div class="stat-label">Ce mois</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-road"></i></div><div><div class="stat-value" id="s-km">0 km</div><div class="stat-label">Distance totale</div></div></div>
+    </div>
+
+    <!-- All rides table -->
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title"><i class="fas fa-list" style="color:var(--primary);margin-right:8px;"></i>Détail de toutes mes courses</div></div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Trajet</th><th>Client</th><th>Distance</th><th>Durée</th><th>Note reçue</th><th>Revenu</th></tr></thead>
+        <tbody id="earnings-table"></tbody>
+      </table></div>
+      <div class="empty-state" id="earnings-empty" style="display:none;"><i class="fas fa-route"></i><h3>Aucune course</h3><p>Vos courses terminées apparaîtront ici.</p></div>
+    </div>
+  </main>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/store.js"></script>
+<script>
+let session;
+window.addEventListener('DOMContentLoaded',()=>{
+  session=LR.requireAuth('chauffeur'); if(!session)return;
+  const user=LR.getUserById(session.userId);
+  document.getElementById('nav-avatar').textContent=session.avatar;
+  document.getElementById('nav-name').textContent=`${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent=session.avatar;
+  document.getElementById('sidebar-name').textContent=`${session.prenom} ${session.nom}`;
+
+  const rides=LR.getRides().filter(r=>r.chauffeurId===session.userId&&r.statut==='termine').sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const total=rides.reduce((s,r)=>s+r.prix,0);
+  const km=rides.reduce((s,r)=>s+(r.distance||0),0);
+  const notes=rides.filter(r=>r.noteChauffeur).map(r=>r.noteChauffeur);
+  const today=new Date().toISOString().slice(0,10);
+  const thisWeek=new Date(Date.now()-7*24*3600*1000).toISOString().slice(0,10);
+  const thisMonth=new Date().toISOString().slice(0,7);
+  const gainToday=rides.filter(r=>r.date&&r.date.startsWith(today)).reduce((s,r)=>s+r.prix,0);
+  const gainWeek=rides.filter(r=>r.date&&r.date>=thisWeek).reduce((s,r)=>s+r.prix,0);
+  const gainMonth=rides.filter(r=>r.date&&r.date.startsWith(thisMonth)).reduce((s,r)=>s+r.prix,0);
+
+  document.getElementById('total-revenus').textContent=total.toFixed(2).replace('.',',');
+  document.getElementById('total-courses-label').textContent=`${rides.length} courses réalisées`;
+  document.getElementById('note-avg').textContent=notes.length?(notes.reduce((a,b)=>a+b,0)/notes.length).toFixed(1)+' ★':'—';
+  document.getElementById('s-today').textContent=gainToday.toFixed(2)+'€';
+  document.getElementById('s-week').textContent=gainWeek.toFixed(2)+'€';
+  document.getElementById('s-month').textContent=gainMonth.toFixed(2)+'€';
+  document.getElementById('s-km').textContent=km.toFixed(1)+' km';
+
+  const tbody=document.getElementById('earnings-table'),empty=document.getElementById('earnings-empty');
+  if(!rides.length){empty.style.display='block';return;}
+  tbody.innerHTML=rides.map(r=>{
+    const client=r.clientId?LR.getUserById(r.clientId):null;
+    return `<tr>
+      <td>${formatDateTime(r.date)}</td>
+      <td><div style="font-weight:600;font-size:0.85rem;">${r.depart||'—'}</div><div class="sub">→ ${r.arrivee||'—'}</div></td>
+      <td>${client?`${client.prenom} ${client.nom}`:'—'}</td>
+      <td>${r.distance?r.distance+' km':'—'}</td>
+      <td>${r.duree?r.duree+' min':'—'}</td>
+      <td>${r.noteClient?'★'.repeat(r.noteClient):'—'}</td>
+      <td style="font-weight:700;color:var(--success);">+${formatPrice(r.prix)}</td>
+    </tr>`;
+  }).join('');
+  hideLoader();
+});
+</script>
+</body>
+</html>

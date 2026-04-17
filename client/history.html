@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Historique des courses | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Historique</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Client</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="profile-sidebar"><div class="profile-sidebar-avatar" id="sidebar-avatar">?</div><div class="profile-sidebar-name" id="sidebar-name">—</div><div class="profile-sidebar-role">Client VTC</div></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-home"></i> Réserver</a></li>
+        <li><a href="tracking.html"><i class="fas fa-map-marker-alt"></i> Suivi en direct</a></li>
+        <li><a href="wallet.html"><i class="fas fa-wallet"></i> Mon Portefeuille</a></li>
+        <li><a href="history.html" class="active"><i class="fas fa-history"></i> Historique</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><ul class="sidebar-menu"><li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li></ul></div>
+  </aside>
+  <main class="main-content">
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-route"></i></div><div><div class="stat-value" id="s-total">0</div><div class="stat-label">Courses totales</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-euro-sign"></i></div><div><div class="stat-value" id="s-depense">0€</div><div class="stat-label">Total dépensé</div></div></div>
+      <div class="stat-card"><div class="stat-icon green"><i class="fas fa-road"></i></div><div><div class="stat-value" id="s-km">0 km</div><div class="stat-label">Distance parcourue</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-star"></i></div><div><div class="stat-value" id="s-note">—</div><div class="stat-label">Note moyenne donnée</div></div></div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title"><i class="fas fa-history" style="color:var(--primary);margin-right:8px;"></i>Toutes mes courses</div></div>
+        <div class="tabs" style="margin:0;">
+          <button class="tab-btn active" onclick="filterRides('tous',this)">Toutes</button>
+          <button class="tab-btn" onclick="filterRides('termine',this)">Terminées</button>
+          <button class="tab-btn" onclick="filterRides('annule',this)">Annulées</button>
+        </div>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Date</th><th>Trajet</th><th>Chauffeur</th><th>Distance</th><th>Durée</th><th>Prix</th><th>Note</th><th>Statut</th></tr></thead>
+        <tbody id="rides-table"></tbody>
+      </table></div>
+      <div class="empty-state" id="rides-empty" style="display:none;"><i class="fas fa-route"></i><h3>Aucune course</h3><p>Vos courses apparaîtront ici.</p></div>
+    </div>
+  </main>
+</div>
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, allRides=[];
+window.addEventListener('DOMContentLoaded',()=>{
+  session=LR.requireAuth('client'); if(!session)return;
+  document.getElementById('nav-avatar').textContent=session.avatar;
+  document.getElementById('nav-name').textContent=`${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent=session.avatar;
+  document.getElementById('sidebar-name').textContent=`${session.prenom} ${session.nom}`;
+  allRides=LR.getRides().filter(r=>r.clientId===session.userId).sort((a,b)=>new Date(b.date)-new Date(a.date));
+  const done=allRides.filter(r=>r.statut==='termine');
+  const depense=done.reduce((s,r)=>s+r.prix,0);
+  const km=done.reduce((s,r)=>s+(r.distance||0),0);
+  const notes=done.filter(r=>r.noteChauffeur).map(r=>r.noteChauffeur);
+  document.getElementById('s-total').textContent=allRides.length;
+  document.getElementById('s-depense').textContent=depense.toFixed(2)+'€';
+  document.getElementById('s-km').textContent=km.toFixed(1)+' km';
+  document.getElementById('s-note').textContent=notes.length?(notes.reduce((a,b)=>a+b,0)/notes.length).toFixed(1)+' ★':'—';
+  renderRides(allRides);
+  hideLoader();
+});
+function filterRides(f,el){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active')); el.classList.add('active');
+  renderRides(f==='tous'?allRides:allRides.filter(r=>r.statut===f));
+}
+function renderRides(rides){
+  const tbody=document.getElementById('rides-table'), empty=document.getElementById('rides-empty');
+  if(!rides.length){tbody.innerHTML='';empty.style.display='block';return;}
+  empty.style.display='none';
+  tbody.innerHTML=rides.map(r=>{
+    const drv=r.chauffeurId?LR.getUserById(r.chauffeurId):null;
+    const statusMap={termine:'badge-success',annule:'badge-danger',en_attente:'badge-warning',accepte:'badge-info',en_cours:'badge-primary'};
+    const statusLabel={termine:'Terminée',annule:'Annulée',en_attente:'En attente',accepte:'Acceptée',en_cours:'En cours'};
+    return `<tr>
+      <td>${formatDateTime(r.date)}</td>
+      <td><div style="font-weight:600;font-size:0.85rem;">${r.depart||'—'}</div><div class="sub">→ ${r.arrivee||'—'}</div></td>
+      <td>${drv?`${drv.prenom} ${drv.nom}`:'—'}</td>
+      <td>${r.distance?r.distance+' km':'—'}</td>
+      <td>${r.duree?r.duree+' min':'—'}</td>
+      <td style="font-weight:700;color:var(--primary);">${r.prix?formatPrice(r.prix):'—'}</td>
+      <td>${r.noteChauffeur?'★'.repeat(r.noteChauffeur):'—'}</td>
+      <td><span class="badge ${statusMap[r.statut]||'badge-gray'}">${statusLabel[r.statut]||r.statut}</span></td>
+    </tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

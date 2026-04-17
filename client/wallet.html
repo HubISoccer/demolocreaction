@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Portefeuille | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Mon Portefeuille</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Client</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="profile-sidebar"><div class="profile-sidebar-avatar" id="sidebar-avatar">?</div><div class="profile-sidebar-name" id="sidebar-name">—</div><div class="profile-sidebar-role">Client VTC</div></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-home"></i> Réserver</a></li>
+        <li><a href="tracking.html"><i class="fas fa-map-marker-alt"></i> Suivi en direct</a></li>
+        <li><a href="wallet.html" class="active"><i class="fas fa-wallet"></i> Mon Portefeuille</a></li>
+        <li><a href="history.html"><i class="fas fa-history"></i> Historique</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <ul class="sidebar-menu">
+        <li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+      </ul>
+    </div>
+  </aside>
+  <main class="main-content">
+    <!-- Wallet card -->
+    <div class="wallet-card">
+      <div class="wallet-label"><i class="fas fa-wallet" style="margin-right:6px;"></i>Solde disponible</div>
+      <div style="display:flex;align-items:baseline;gap:8px;">
+        <div class="wallet-balance" id="wallet-balance">150,00</div>
+        <div class="wallet-currency">EUR</div>
+      </div>
+      <div style="font-size:0.8rem;color:rgba(255,255,255,0.6);margin-top:6px;">Mis à jour il y a quelques instants</div>
+      <div class="wallet-actions">
+        <button class="btn btn-gold" onclick="openRecharge()"><i class="fas fa-plus-circle"></i> Recharger</button>
+        <button class="btn" style="background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.25);" onclick="showToast('Virement disponible avec un compte vérifié.','info')"><i class="fas fa-arrow-up-from-bracket"></i> Retirer</button>
+      </div>
+    </div>
+
+    <!-- Stats row -->
+    <div class="stats-grid" style="margin-bottom:24px;">
+      <div class="stat-card"><div class="stat-icon green"><i class="fas fa-arrow-down"></i></div><div><div class="stat-value" id="stat-entrees">0€</div><div class="stat-label">Total rechargé</div></div></div>
+      <div class="stat-card"><div class="stat-icon red"><i class="fas fa-arrow-up"></i></div><div><div class="stat-value" id="stat-sorties">0€</div><div class="stat-label">Total dépensé</div></div></div>
+      <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-exchange-alt"></i></div><div><div class="stat-value" id="stat-nb">0</div><div class="stat-label">Transactions</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-calendar-check"></i></div><div><div class="stat-value" id="stat-last">—</div><div class="stat-label">Dernière activité</div></div></div>
+    </div>
+
+    <!-- Transactions -->
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title"><i class="fas fa-list" style="color:var(--primary);margin-right:8px;"></i>Historique des transactions</div></div>
+        <div class="tabs" style="margin:0;">
+          <button class="tab-btn active" onclick="filterTx('tous',this)">Tous</button>
+          <button class="tab-btn" onclick="filterTx('credit',this)">Recharges</button>
+          <button class="tab-btn" onclick="filterTx('debit',this)">Dépenses</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Type</th><th>Description</th><th>Date</th><th>Montant</th><th>Statut</th></tr></thead>
+          <tbody id="tx-table"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="tx-empty" style="display:none;"><i class="fas fa-receipt"></i><h3>Aucune transaction</h3><p>Votre historique apparaîtra ici.</p></div>
+    </div>
+  </main>
+</div>
+
+<!-- Recharge modal -->
+<div class="modal-overlay" id="recharge-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title"><i class="fas fa-plus-circle" style="color:var(--success);margin-right:8px;"></i>Recharger le portefeuille</div><button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <p style="font-size:0.85rem;color:var(--gray);margin-bottom:20px;">Choisissez le montant à ajouter à votre portefeuille Loc'Reaction.</p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:18px;" id="amount-presets">
+        <button class="btn btn-outline" onclick="setAmount(20)" style="font-size:0.85rem;">20 €</button>
+        <button class="btn btn-outline active-preset" onclick="setAmount(50)" style="font-size:0.85rem;">50 €</button>
+        <button class="btn btn-outline" onclick="setAmount(100)" style="font-size:0.85rem;">100 €</button>
+        <button class="btn btn-outline" onclick="setAmount(150)" style="font-size:0.85rem;">150 €</button>
+        <button class="btn btn-outline" onclick="setAmount(200)" style="font-size:0.85rem;">200 €</button>
+        <button class="btn btn-outline" onclick="setAmount(500)" style="font-size:0.85rem;">500 €</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Montant personnalisé (€)</label>
+        <div class="form-icon-wrap"><i class="fas fa-euro-sign"></i><input type="number" id="recharge-amount" class="form-control" style="padding-left:44px;" value="50" min="5" max="1000"></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Mode de paiement</label>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--gray-light);border-radius:var(--radius);cursor:pointer;">
+            <input type="radio" name="payment" value="card" checked style="accent-color:var(--primary);">
+            <i class="fas fa-credit-card" style="color:var(--primary);"></i>
+            <span style="font-size:0.87rem;font-weight:500;">Carte bancaire (Visa/MC)</span>
+          </label>
+          <label style="display:flex;align-items:center;gap:10px;padding:12px;border:1.5px solid var(--gray-light);border-radius:var(--radius);cursor:pointer;">
+            <input type="radio" name="payment" value="apple" style="accent-color:var(--primary);">
+            <i class="fab fa-apple" style="color:var(--dark);"></i>
+            <span style="font-size:0.87rem;font-weight:500;">Apple Pay</span>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-gray" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-success" onclick="doRecharge()"><i class="fas fa-check"></i> Recharger maintenant</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, wallet, allTx = [], currentFilter = 'tous';
+window.addEventListener('DOMContentLoaded', () => {
+  session = LR.requireAuth('client');
+  if (!session) return;
+  wallet = LR.getWallet(session.userId);
+  document.getElementById('nav-avatar').textContent = session.avatar;
+  document.getElementById('nav-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent = session.avatar;
+  document.getElementById('sidebar-name').textContent = `${session.prenom} ${session.nom}`;
+  loadWallet();
+  hideLoader();
+});
+
+function loadWallet() {
+  wallet = LR.getWallet(session.userId);
+  allTx = wallet.transactions || [];
+  document.getElementById('wallet-balance').textContent = wallet.solde.toFixed(2).replace('.',',');
+  const entrees = allTx.filter(t=>t.type==='credit').reduce((s,t)=>s+t.montant,0);
+  const sorties = allTx.filter(t=>t.type==='debit').reduce((s,t)=>s+t.montant,0);
+  document.getElementById('stat-entrees').textContent = entrees.toFixed(2)+'€';
+  document.getElementById('stat-sorties').textContent = sorties.toFixed(2)+'€';
+  document.getElementById('stat-nb').textContent = allTx.length;
+  document.getElementById('stat-last').textContent = allTx.length ? formatDate(allTx[0].date) : '—';
+  renderTx(allTx);
+}
+
+function renderTx(txs) {
+  const tbody = document.getElementById('tx-table');
+  const empty = document.getElementById('tx-empty');
+  if (!txs.length) { tbody.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  tbody.innerHTML = txs.map(t => `
+    <tr>
+      <td><span class="badge ${t.type==='credit'?'badge-success':'badge-danger'}"><i class="fas fa-${t.type==='credit'?'arrow-down':'arrow-up'}"></i> ${t.type==='credit'?'Crédit':'Débit'}</span></td>
+      <td>${t.desc||'—'}</td>
+      <td>${formatDate(t.date)}</td>
+      <td style="font-weight:700;color:${t.type==='credit'?'var(--success)':'var(--danger)'};">${t.type==='credit'?'+':'-'}${formatPrice(t.montant)}</td>
+      <td><span class="badge badge-success">Validé</span></td>
+    </tr>
+  `).join('');
+}
+
+function filterTx(type, el) {
+  currentFilter = type;
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  if (type==='tous') renderTx(allTx);
+  else renderTx(allTx.filter(t=>t.type===type));
+}
+
+function openRecharge() { document.getElementById('recharge-modal').classList.add('open'); }
+function closeModal()  { document.getElementById('recharge-modal').classList.remove('open'); }
+function setAmount(n)  { document.getElementById('recharge-amount').value = n; }
+
+function doRecharge() {
+  const amount = parseFloat(document.getElementById('recharge-amount').value);
+  if (isNaN(amount)||amount<5) { showToast('Montant minimum : 5€','warning'); return; }
+  if (amount>1000) { showToast('Montant maximum : 1 000€','warning'); return; }
+  // Simulate payment
+  const btn = document.querySelector('#recharge-modal .btn-success');
+  btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Traitement…';
+  setTimeout(()=>{
+    LR.creditWallet(session.userId, amount, `Rechargement — ${amount.toFixed(2)}€`);
+    wallet = LR.getWallet(session.userId);
+    loadWallet();
+    closeModal();
+    showToast(`+${amount.toFixed(2)}€ ajoutés à votre portefeuille !`, 'success');
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Recharger maintenant';
+  },1500);
+}
+</script>
+</body>
+</html>

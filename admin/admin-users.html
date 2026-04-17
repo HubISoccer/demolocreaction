@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gestion Utilisateurs | Admin Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.user-detail-card{background:var(--white);border:1px solid var(--gray-light);border-radius:var(--radius-xl);padding:20px;display:flex;align-items:center;gap:16px;transition:all 0.3s;cursor:pointer;}
+.user-detail-card:hover{box-shadow:var(--shadow-md);border-color:var(--primary);transform:translateY(-2px);}
+.udc-avatar{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:700;color:#fff;flex-shrink:0;}
+.udc-avatar.driver{background:linear-gradient(135deg,#1a1a2e,#2d2d4e);}
+.udc-avatar.admin{background:linear-gradient(135deg,var(--success),#1e8449);}
+.udc-info{flex:1;}
+.udc-name{font-size:0.9rem;font-weight:700;color:var(--dark);}
+.udc-email{font-size:0.75rem;color:var(--gray);}
+.udc-meta{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+.search-bar{display:flex;gap:12px;margin-bottom:20px;}
+.search-input-wrap{position:relative;flex:1;}
+.search-input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--gray);}
+.search-input{width:100%;padding:11px 16px 11px 44px;border:1.5px solid var(--gray-light);border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:0.9rem;outline:none;transition:all 0.2s;}
+.search-input:focus{border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-xlight);}
+.filter-tabs{display:flex;gap:6px;}
+</style>
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Gestion Utilisateurs</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role" style="color:var(--gold-dark);font-weight:600;">Admin</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="profile-sidebar" style="background:linear-gradient(135deg,#1a1a2e,#2d2d4e);">
+      <div class="profile-sidebar-avatar" id="sidebar-avatar" style="border-color:var(--gold);">?</div>
+      <div class="profile-sidebar-name" id="sidebar-name">—</div>
+      <div class="profile-sidebar-role" style="color:var(--gold);">Administrateur</div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Administration</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-chart-pie"></i> Vue d'ensemble</a></li>
+        <li><a href="admin-users.html" class="active"><i class="fas fa-users"></i> Utilisateurs</a></li>
+        <li><a href="admin-rides.html"><i class="fas fa-route"></i> Toutes les courses</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><ul class="sidebar-menu"><li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li></ul></div>
+  </aside>
+
+  <main class="main-content">
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-users"></i></div><div><div class="stat-value" id="s-total">0</div><div class="stat-label">Total utilisateurs</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-user"></i></div><div><div class="stat-value" id="s-clients">0</div><div class="stat-label">Clients</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-car"></i></div><div><div class="stat-value" id="s-drivers">0</div><div class="stat-label">Chauffeurs</div></div></div>
+      <div class="stat-card"><div class="stat-icon green"><i class="fas fa-circle"></i></div><div><div class="stat-value" id="s-active">0</div><div class="stat-label">Comptes actifs</div></div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <div><div class="card-title"><i class="fas fa-users" style="color:var(--primary);margin-right:8px;"></i>Tous les utilisateurs</div></div>
+        <button class="btn btn-primary btn-sm" onclick="document.getElementById('add-modal').classList.add('open')"><i class="fas fa-user-plus"></i> Ajouter</button>
+      </div>
+
+      <div class="search-bar">
+        <div class="search-input-wrap">
+          <i class="fas fa-search"></i>
+          <input type="text" class="search-input" id="search-input" placeholder="Rechercher par nom, email…" oninput="filterAndRender()">
+        </div>
+        <div class="filter-tabs">
+          <button class="btn btn-outline btn-sm" id="f-tous" onclick="setFilter('tous',this)">Tous</button>
+          <button class="btn btn-outline-gray btn-sm" id="f-client" onclick="setFilter('client',this)">Clients</button>
+          <button class="btn btn-outline-gray btn-sm" id="f-chauffeur" onclick="setFilter('chauffeur',this)">Chauffeurs</button>
+          <button class="btn btn-outline-gray btn-sm" id="f-admin" onclick="setFilter('admin',this)">Admins</button>
+        </div>
+      </div>
+
+      <!-- Grid de cartes utilisateurs -->
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:14px;" id="users-grid"></div>
+      <div class="empty-state" id="users-empty" style="display:none;"><i class="fas fa-users-slash"></i><h3>Aucun résultat</h3><p>Essayez une autre recherche.</p></div>
+
+      <!-- Pagination -->
+      <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:20px;" id="pagination"></div>
+    </div>
+  </main>
+</div>
+
+<!-- User detail panel -->
+<div class="modal-overlay" id="user-detail-modal">
+  <div class="modal" style="max-width:520px;">
+    <div class="modal-header"><div class="modal-title" id="detail-title">Détail utilisateur</div><button class="modal-close" onclick="document.getElementById('user-detail-modal').classList.remove('open')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-footer" id="detail-footer"></div>
+  </div>
+</div>
+
+<!-- Add user modal -->
+<div class="modal-overlay" id="add-modal">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title"><i class="fas fa-user-plus" style="color:var(--success);margin-right:8px;"></i>Ajouter un utilisateur</div><button class="modal-close" onclick="document.getElementById('add-modal').classList.remove('open')"><i class="fas fa-times"></i></button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Prénom</label><div class="form-icon-wrap"><i class="fas fa-user"></i><input type="text" id="new-prenom" class="form-control" style="padding-left:44px;"></div></div>
+        <div class="form-group"><label class="form-label">Nom</label><div class="form-icon-wrap"><i class="fas fa-user"></i><input type="text" id="new-nom" class="form-control" style="padding-left:44px;"></div></div>
+      </div>
+      <div class="form-group"><label class="form-label">Email</label><div class="form-icon-wrap"><i class="fas fa-envelope"></i><input type="email" id="new-email" class="form-control" style="padding-left:44px;"></div></div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Téléphone</label><div class="form-icon-wrap"><i class="fas fa-phone"></i><input type="tel" id="new-tel" class="form-control" style="padding-left:44px;" placeholder="+33 6 XX XX XX XX"></div></div>
+        <div class="form-group"><label class="form-label">Ville</label><div class="form-icon-wrap"><i class="fas fa-city"></i><input type="text" id="new-ville" class="form-control" style="padding-left:44px;" placeholder="Paris"></div></div>
+      </div>
+      <div class="form-group"><label class="form-label">Rôle</label><select id="new-role" class="form-select"><option value="client">Client</option><option value="chauffeur">Chauffeur</option><option value="admin">Admin</option></select></div>
+      <div class="form-group"><label class="form-label">Mot de passe</label><div class="form-icon-wrap"><i class="fas fa-lock"></i><input type="text" id="new-password" class="form-control" style="padding-left:44px;" value="demo123"></div></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-gray" onclick="document.getElementById('add-modal').classList.remove('open')">Annuler</button>
+      <button class="btn btn-primary" onclick="addUser()"><i class="fas fa-save"></i> Créer l'utilisateur</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, allUsers = [], currentFilter = 'tous', currentPage = 1;
+const PER_PAGE = 12;
+
+window.addEventListener('DOMContentLoaded', () => {
+  session = LR.requireAuth('admin'); if (!session) return;
+  document.getElementById('nav-avatar').textContent = session.avatar;
+  document.getElementById('nav-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent = session.avatar;
+  document.getElementById('sidebar-name').textContent = `${session.prenom} ${session.nom}`;
+  allUsers = LR.getUsers();
+  updateStats();
+  filterAndRender();
+  hideLoader();
+});
+
+function updateStats() {
+  document.getElementById('s-total').textContent = allUsers.length;
+  document.getElementById('s-clients').textContent = allUsers.filter(u => u.role === 'client').length;
+  document.getElementById('s-drivers').textContent = allUsers.filter(u => u.role === 'chauffeur').length;
+  document.getElementById('s-active').textContent = allUsers.filter(u => u.actif).length;
+}
+
+function setFilter(f, el) {
+  currentFilter = f; currentPage = 1;
+  document.querySelectorAll('.filter-tabs .btn').forEach(b => { b.classList.remove('btn-primary'); b.classList.add('btn-outline-gray'); });
+  el.classList.remove('btn-outline-gray'); el.classList.add('btn-primary');
+  filterAndRender();
+}
+
+function filterAndRender() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  let filtered = allUsers.filter(u => {
+    if (currentFilter !== 'tous' && u.role !== currentFilter) return false;
+    if (q && !`${u.prenom} ${u.nom} ${u.email}`.toLowerCase().includes(q)) return false;
+    return true;
+  });
+  const total = filtered.length;
+  const pages = Math.ceil(total / PER_PAGE);
+  const paged = filtered.slice((currentPage - 1) * PER_PAGE, currentPage * PER_PAGE);
+
+  const grid = document.getElementById('users-grid');
+  const empty = document.getElementById('users-empty');
+  if (!paged.length) { grid.innerHTML = ''; empty.style.display = 'block'; renderPagination(0, 0); return; }
+  empty.style.display = 'none';
+
+  const roleColors = { client: 'badge-primary', chauffeur: 'badge-info', admin: 'badge-gold' };
+  grid.innerHTML = paged.map(u => {
+    const rides = LR.getRides().filter(r => (r.clientId === u.id || r.chauffeurId === u.id) && r.statut === 'termine').length;
+    return `<div class="user-detail-card" onclick="openDetail('${u.id}')">
+      <div class="udc-avatar ${u.role}">${u.avatar || '?'}</div>
+      <div class="udc-info">
+        <div class="udc-name">${u.prenom} ${u.nom}</div>
+        <div class="udc-email">${u.email}</div>
+        <div class="udc-meta">
+          <span class="badge ${roleColors[u.role] || 'badge-gray'}">${u.role}</span>
+          <span class="badge ${u.actif ? 'badge-success' : 'badge-danger'}">${u.actif ? 'Actif' : 'Inactif'}</span>
+          ${rides > 0 ? `<span class="badge badge-gray">${rides} courses</span>` : ''}
+        </div>
+      </div>
+      <i class="fas fa-chevron-right" style="color:var(--gray-light);"></i>
+    </div>`;
+  }).join('');
+  renderPagination(pages, currentPage);
+}
+
+function renderPagination(pages, current) {
+  const el = document.getElementById('pagination');
+  if (pages <= 1) { el.innerHTML = ''; return; }
+  let html = `<button class="btn btn-outline-gray btn-sm" onclick="goPage(${current - 1})" ${current === 1 ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+  for (let i = 1; i <= pages; i++) {
+    html += `<button class="btn ${i === current ? 'btn-primary' : 'btn-outline-gray'} btn-sm" onclick="goPage(${i})">${i}</button>`;
+  }
+  html += `<button class="btn btn-outline-gray btn-sm" onclick="goPage(${current + 1})" ${current === pages ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+  el.innerHTML = html;
+}
+function goPage(p) { currentPage = p; filterAndRender(); }
+
+function openDetail(userId) {
+  const u = LR.getUserById(userId);
+  if (!u) return;
+  const rides = LR.getRides().filter(r => (r.clientId === u.id || r.chauffeurId === u.id) && r.statut === 'termine');
+  const wallet = LR.getWallet(u.id);
+  document.getElementById('detail-title').textContent = `${u.prenom} ${u.nom}`;
+  document.getElementById('detail-body').innerHTML = `
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="width:70px;height:70px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--primary-light));display:flex;align-items:center;justify-content:center;font-size:1.5rem;font-weight:800;color:#fff;margin:0 auto 12px;border:3px solid var(--gold);">${u.avatar || '?'}</div>
+      <div style="font-size:1.1rem;font-weight:700;">${u.prenom} ${u.nom}</div>
+      <div style="font-size:0.82rem;color:var(--gray);">${u.email}</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:var(--gray-xlight);border-radius:var(--radius);padding:12px;text-align:center;"><div style="font-size:1.2rem;font-weight:800;color:var(--primary);">${rides.length}</div><div style="font-size:0.72rem;color:var(--gray);">Courses</div></div>
+      <div style="background:var(--gray-xlight);border-radius:var(--radius);padding:12px;text-align:center;"><div style="font-size:1.2rem;font-weight:800;color:var(--success);">${wallet.solde.toFixed(2)}€</div><div style="font-size:0.72rem;color:var(--gray);">Solde portefeuille</div></div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:6px;font-size:0.84rem;">
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Téléphone</span><span style="font-weight:600;">${u.tel || '—'}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Ville</span><span style="font-weight:600;">${u.ville || '—'}</span></div>
+      <div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Inscrit le</span><span style="font-weight:600;">${formatDate(u.createdAt)}</span></div>
+      ${u.role === 'chauffeur' ? `<div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Véhicule</span><span style="font-weight:600;">${u.voiture || '—'}</span></div><div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Plaque</span><span style="font-weight:600;">${u.plaque || '—'}</span></div><div style="display:flex;justify-content:space-between;"><span style="color:var(--gray);">Note</span><span style="font-weight:600;color:var(--gold-dark);">${u.note || '—'}★</span></div>` : ''}
+    </div>`;
+  document.getElementById('detail-footer').innerHTML = `
+    <button class="btn btn-${u.actif ? 'danger' : 'success'}" onclick="toggleStatus('${u.id}',${u.actif})"><i class="fas fa-${u.actif ? 'ban' : 'check'}"></i> ${u.actif ? 'Désactiver' : 'Activer'}</button>
+    <button class="btn btn-primary" onclick="document.getElementById('user-detail-modal').classList.remove('open')">Fermer</button>`;
+  document.getElementById('user-detail-modal').classList.add('open');
+}
+
+function toggleStatus(id, actif) {
+  LR.updateUser(id, { actif: !actif });
+  allUsers = LR.getUsers();
+  updateStats(); filterAndRender();
+  document.getElementById('user-detail-modal').classList.remove('open');
+  showToast(`Compte ${actif ? 'désactivé' : 'activé'}.`, actif ? 'warning' : 'success');
+}
+
+function addUser() {
+  const prenom = document.getElementById('new-prenom').value.trim();
+  const nom = document.getElementById('new-nom').value.trim();
+  const email = document.getElementById('new-email').value.trim();
+  const tel = document.getElementById('new-tel').value.trim();
+  const ville = document.getElementById('new-ville').value.trim();
+  const role = document.getElementById('new-role').value;
+  const password = document.getElementById('new-password').value;
+  if (!prenom || !nom || !email) { showToast('Prénom, nom et email obligatoires.', 'warning'); return; }
+  if (LR.getUsers().find(u => u.email === email)) { showToast('Email déjà utilisé.', 'error'); return; }
+  LR.createUser({ prenom, nom, email, tel, ville, role, password, avatar: prenom[0] + nom[0] });
+  allUsers = LR.getUsers();
+  updateStats(); filterAndRender();
+  document.getElementById('add-modal').classList.remove('open');
+  showToast(`${prenom} ${nom} créé avec succès !`, 'success');
+}
+</script>
+</body>
+</html>

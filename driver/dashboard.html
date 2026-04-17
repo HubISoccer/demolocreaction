@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Chauffeur | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.earning-chart-bar{display:flex;align-items:flex-end;gap:8px;height:120px;padding-top:12px;}
+.ecb-col{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.ecb-bar{width:100%;background:linear-gradient(to top,var(--primary),var(--primary-light));border-radius:4px 4px 0 0;transition:height 0.5s ease;min-height:4px;}
+.ecb-label{font-size:0.65rem;color:var(--gray);}
+.ecb-val{font-size:0.68rem;font-weight:700;color:var(--dark);}
+</style>
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Espace Chauffeur</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn-icon" id="notif-btn"><i class="fas fa-bell"></i><span class="nav-badge" id="notif-count" style="display:none;">1</span></button>
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Chauffeur</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<div class="dashboard-wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="profile-sidebar" id="sidebar-profile">
+      <div class="profile-sidebar-avatar" id="sidebar-avatar">?</div>
+      <div class="profile-sidebar-name" id="sidebar-name">—</div>
+      <div class="profile-sidebar-role">Chauffeur VTC</div>
+      <div class="profile-sidebar-stat">
+        <div class="profile-sidebar-stat-item"><div class="val" id="sb-courses">0</div><div class="lbl">Courses</div></div>
+        <div class="profile-sidebar-stat-item"><div class="val" id="sb-note">5.0★</div><div class="lbl">Note</div></div>
+        <div class="profile-sidebar-stat-item"><div class="val" id="sb-gain">0€</div><div class="lbl">Ce mois</div></div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html" class="active"><i class="fas fa-tachometer-alt"></i> Tableau de bord</a></li>
+        <li><a href="earnings.html"><i class="fas fa-chart-line"></i> Mes Revenus</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Mon véhicule</div>
+      <ul class="sidebar-menu">
+        <li><a href="#"><i class="fas fa-car-alt"></i> Mon Véhicule</a></li>
+        <li><a href="#"><i class="fas fa-user-cog"></i> Mon Profil</a></li>
+        <li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+      </ul>
+    </div>
+    <!-- Car info card -->
+    <div style="margin:0 16px 24px;background:var(--gray-xlight);border-radius:var(--radius-lg);padding:16px;">
+      <div style="font-size:0.72rem;font-weight:700;color:var(--gray);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px;">Mon véhicule</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:2rem;">🚗</div>
+        <div><div style="font-size:0.87rem;font-weight:700;" id="sb-voiture">—</div><div style="font-size:0.72rem;color:var(--gray);" id="sb-plaque">—</div></div>
+      </div>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <!-- Status card -->
+    <div class="driver-status-card" id="status-card">
+      <div class="driver-status-header">
+        <div class="driver-status-indicator">
+          <div class="status-dot offline" id="status-dot"></div>
+          <span id="status-label">Hors ligne</span>
+        </div>
+        <label class="toggle-wrap">
+          <label class="toggle-switch"><input type="checkbox" id="availability-toggle" onchange="toggleAvailability()"><span class="toggle-slider"></span></label>
+          <span class="toggle-label" id="toggle-label">Me rendre disponible</span>
+        </label>
+      </div>
+      <p style="font-size:0.82rem;color:var(--gray);" id="status-desc">Activez votre disponibilité pour recevoir des invitations de course.</p>
+      <div id="online-info" style="display:none;margin-top:12px;background:var(--success-light);border-radius:var(--radius);padding:12px;font-size:0.82rem;color:var(--success);font-weight:600;">
+        <i class="fas fa-satellite-dish"></i> Vous êtes en ligne. Les clients peuvent vous commander.
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-route"></i></div><div><div class="stat-value" id="s-total">0</div><div class="stat-label">Courses totales</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-euro-sign"></i></div><div><div class="stat-value" id="s-gain-today">0€</div><div class="stat-label">Gains aujourd'hui</div></div></div>
+      <div class="stat-card"><div class="stat-icon green"><i class="fas fa-star"></i></div><div><div class="stat-value" id="s-note">4.9</div><div class="stat-label">Ma note</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-clock"></i></div><div><div class="stat-value" id="s-heures">0h</div><div class="stat-label">Heures en ligne</div></div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+      <!-- Invitation de course -->
+      <div>
+        <div class="section-header"><div class="section-title"><i class="fas fa-bell"></i> Invitation en attente</div></div>
+        <div id="invite-container">
+          <div class="card" style="text-align:center;padding:32px;">
+            <div style="font-size:2.5rem;color:var(--gray-light);margin-bottom:12px;"><i class="fas fa-bell-slash"></i></div>
+            <p style="color:var(--gray);font-size:0.87rem;">Aucune invitation pour l'instant.<br>Activez votre disponibilité pour en recevoir.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Map -->
+      <div>
+        <div class="section-header"><div class="section-title"><i class="fas fa-map"></i> Ma position</div></div>
+        <div class="card" style="padding:0;overflow:hidden;height:280px;">
+          <div id="driver-map" style="height:100%;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent courses -->
+    <div class="card" style="margin-top:24px;">
+      <div class="card-header">
+        <div><div class="card-title"><i class="fas fa-history" style="color:var(--primary);margin-right:8px;"></i>Mes dernières courses</div></div>
+        <a href="earnings.html" class="section-action">Voir tout</a>
+      </div>
+      <div id="recent-list">
+        <div class="empty-state" style="padding:24px;"><i class="fas fa-route"></i><p>Aucune course récente</p></div>
+      </div>
+    </div>
+
+    <!-- Weekly earnings chart -->
+    <div class="card">
+      <div class="card-header"><div class="card-title"><i class="fas fa-chart-bar" style="color:var(--primary);margin-right:8px;"></i>Gains cette semaine</div></div>
+      <div class="earning-chart-bar" id="week-chart"></div>
+    </div>
+  </main>
+</div>
+
+<!-- Invite modal -->
+<div class="modal-overlay" id="invite-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-bell" style="color:var(--gold-dark);margin-right:8px;"></i>Nouvelle invitation !</div>
+    </div>
+    <div class="modal-body">
+      <div style="background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--radius-lg);padding:20px;color:#fff;margin-bottom:16px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;">
+          <span style="background:var(--gold);color:var(--dark);padding:4px 12px;border-radius:var(--radius-pill);font-size:0.75rem;font-weight:800;">NOUVEAU</span>
+          <span style="color:var(--gold);font-size:1.3rem;font-weight:800;" id="modal-countdown">30s</span>
+        </div>
+        <div style="margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:0.87rem;"><i class="fas fa-circle" style="color:#2ecc71;"></i><span id="modal-depart">—</span></div>
+          <div style="width:2px;height:14px;background:rgba(255,255,255,0.3);margin-left:7px;"></div>
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 0;font-size:0.87rem;"><i class="fas fa-map-marker-alt" style="color:var(--gold);"></i><span id="modal-arrivee">—</span></div>
+        </div>
+        <div style="display:flex;gap:20px;">
+          <div><div style="font-size:1.3rem;font-weight:800;color:var(--gold);" id="modal-prix">—</div><div style="font-size:0.7rem;opacity:0.75;">Revenu net</div></div>
+          <div><div style="font-size:1.3rem;font-weight:800;color:#fff;" id="modal-dist">—</div><div style="font-size:0.7rem;opacity:0.75;">Distance</div></div>
+          <div><div style="font-size:1.3rem;font-weight:800;color:#fff;" id="modal-duree">—</div><div style="font-size:0.7rem;opacity:0.75;">Durée</div></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" onclick="declineRide()"><i class="fas fa-times"></i> Refuser</button>
+      <button class="btn btn-success" onclick="acceptRide()"><i class="fas fa-check"></i> Accepter</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, driverUser, map, inviteTimer, pendingInviteRide=null, countdownInterval;
+let isOnline=false;
+
+window.addEventListener('DOMContentLoaded',()=>{
+  session=LR.requireAuth('chauffeur'); if(!session)return;
+  driverUser=LR.getUserById(session.userId);
+  document.getElementById('nav-avatar').textContent=session.avatar;
+  document.getElementById('nav-name').textContent=`${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent=session.avatar;
+  document.getElementById('sidebar-name').textContent=`${session.prenom} ${session.nom}`;
+  document.getElementById('sb-voiture').textContent=driverUser?.voiture||'—';
+  document.getElementById('sb-plaque').textContent=driverUser?.plaque||'—';
+  const note=driverUser?.note||4.9, totalC=driverUser?.coursesTotal||0;
+  document.getElementById('sb-note').textContent=note+'★';
+  document.getElementById('sb-courses').textContent=totalC;
+  document.getElementById('s-total').textContent=totalC;
+  document.getElementById('s-note').textContent=note;
+
+  // My rides
+  const myRides=LR.getRides().filter(r=>r.chauffeurId===session.userId&&r.statut==='termine');
+  const gainToday=myRides.filter(r=>r.date&&r.date.startsWith(new Date().toISOString().slice(0,10))).reduce((s,r)=>s+r.prix,0);
+  document.getElementById('s-gain-today').textContent=gainToday.toFixed(2)+'€';
+  document.getElementById('sb-gain').textContent=myRides.reduce((s,r)=>s+r.prix,0).toFixed(0)+'€';
+
+  renderRecentRides(myRides);
+  renderWeekChart(myRides);
+  initMap();
+
+  // Check if was already online
+  isOnline=driverUser?.disponible||false;
+  document.getElementById('availability-toggle').checked=isOnline;
+  updateStatusUI();
+
+  hideLoader();
+});
+
+function initMap(){
+  map=L.map('driver-map').setView([48.8566,2.3522],13);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OSM'}).addTo(map);
+  const icon=L.divIcon({html:'<div style="width:38px;height:38px;background:#551B8C;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FFCC00;font-size:16px;border:3px solid #fff;box-shadow:0 2px 10px rgba(85,27,140,0.5);"><i class="fas fa-car"></i></div>',iconSize:[38,38],iconAnchor:[19,19],className:''});
+  L.marker([48.8566,2.3522],{icon}).addTo(map).bindPopup('📍 Votre position');
+}
+
+function toggleAvailability(){
+  isOnline=document.getElementById('availability-toggle').checked;
+  LR.updateUser(session.userId,{disponible:isOnline});
+  updateStatusUI();
+  if(isOnline){
+    showToast('Vous êtes en ligne ! En attente d\'invitations…','success');
+    // Simulate incoming ride after 4s
+    setTimeout(simulateInvite,4000);
+  } else {
+    showToast('Vous êtes hors ligne.','warning');
+  }
+}
+
+function updateStatusUI(){
+  const dot=document.getElementById('status-dot'),label=document.getElementById('status-label'),desc=document.getElementById('status-desc'),onlineInfo=document.getElementById('online-info'),card=document.getElementById('status-card');
+  if(isOnline){
+    dot.className='status-dot online'; label.textContent='En ligne'; desc.textContent='Vous êtes disponible et recevez des invitations.'; onlineInfo.style.display='block'; card.className='driver-status-card online'; document.getElementById('toggle-label').textContent='Je suis disponible';
+  } else {
+    dot.className='status-dot offline'; label.textContent='Hors ligne'; desc.textContent='Activez votre disponibilité pour recevoir des invitations de course.'; onlineInfo.style.display='none'; card.className='driver-status-card'; document.getElementById('toggle-label').textContent='Me rendre disponible';
+  }
+}
+
+function simulateInvite(){
+  if(!isOnline)return;
+  // Find pending ride
+  const pending=LR.getPendingRides()[0]||{id:'demo',depart:'Châtelet, Paris',arrivee:'Versailles',prix:55,distance:28.5,duree:40,clientId:'u1'};
+  pendingInviteRide=pending;
+  document.getElementById('modal-depart').textContent=pending.depart||'Bastille, Paris';
+  document.getElementById('modal-arrivee').textContent=pending.arrivee||'Aéroport CDG';
+  document.getElementById('modal-prix').textContent=formatPrice(pending.prix||45);
+  document.getElementById('modal-dist').textContent=(pending.distance||18.5)+' km';
+  document.getElementById('modal-duree').textContent=(pending.duree||35)+' min';
+  document.getElementById('invite-modal').classList.add('open');
+  document.getElementById('notif-count').style.display='flex';
+  // countdown
+  let cnt=30;
+  document.getElementById('modal-countdown').textContent=cnt+'s';
+  countdownInterval=setInterval(()=>{
+    cnt--;
+    document.getElementById('modal-countdown').textContent=cnt+'s';
+    if(cnt<=0){clearInterval(countdownInterval);declineRide();}
+  },1000);
+  // Notification sound simulation
+  showToast('🔔 Nouvelle invitation de course !','info');
+}
+
+function acceptRide(){
+  clearInterval(countdownInterval);
+  document.getElementById('invite-modal').classList.remove('open');
+  if(pendingInviteRide&&pendingInviteRide.id&&pendingInviteRide.id!=='demo'){
+    LR.updateRide(pendingInviteRide.id,{statut:'accepte',chauffeurId:session.userId});
+  }
+  showToast('Course acceptée ! En route vers le client 🚗','success');
+  document.getElementById('notif-count').style.display='none';
+  renderInviteAccepted();
+}
+
+function declineRide(){
+  clearInterval(countdownInterval);
+  document.getElementById('invite-modal').classList.remove('open');
+  document.getElementById('notif-count').style.display='none';
+  showToast('Invitation refusée.','warning');
+}
+
+function renderInviteAccepted(){
+  document.getElementById('invite-container').innerHTML=`
+    <div style="background:linear-gradient(135deg,var(--success),#1e8449);border-radius:var(--radius-xl);padding:20px;color:#fff;">
+      <div style="font-size:0.8rem;opacity:0.8;margin-bottom:8px;">Course en cours</div>
+      <div style="font-size:1rem;font-weight:700;margin-bottom:4px;">${pendingInviteRide?.depart||'Départ'}</div>
+      <div style="font-size:0.82rem;opacity:0.8;">→ ${pendingInviteRide?.arrivee||'Arrivée'}</div>
+      <div style="margin-top:12px;font-size:1.4rem;font-weight:800;color:var(--gold);">${formatPrice(pendingInviteRide?.prix||45)}</div>
+      <button class="btn btn-gold" style="margin-top:14px;width:100%;" onclick="finishRide()"><i class="fas fa-flag-checkered"></i> Terminer la course</button>
+    </div>`;
+}
+
+function finishRide(){
+  if(pendingInviteRide&&pendingInviteRide.id&&pendingInviteRide.id!=='demo'){
+    LR.updateRide(pendingInviteRide.id,{statut:'termine'});
+    LR.debitWallet(pendingInviteRide.clientId||'u1',pendingInviteRide.prix||45,`Course ${pendingInviteRide.depart} → ${pendingInviteRide.arrivee}`);
+    LR.updateUser(session.userId,{coursesTotal:(driverUser?.coursesTotal||0)+1});
+  }
+  showToast('✅ Course terminée ! Paiement reçu.','success');
+  document.getElementById('invite-container').innerHTML=`<div class="card" style="text-align:center;padding:24px;"><div style="font-size:2.5rem;color:var(--gray-light);margin-bottom:10px;"><i class="fas fa-bell-slash"></i></div><p style="color:var(--gray);font-size:0.87rem;">En attente d'une nouvelle invitation…</p></div>`;
+  document.getElementById('s-gain-today').textContent=formatPrice(pendingInviteRide?.prix||45);
+  if(isOnline) setTimeout(()=>showToast('🔄 En attente d\'une nouvelle course…','info'),2000);
+}
+
+function renderRecentRides(rides){
+  const c=document.getElementById('recent-list');
+  if(!rides.length)return;
+  c.innerHTML=rides.slice(0,4).map(r=>`<div style="display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--gray-xlight);">
+    <div style="width:40px;height:40px;border-radius:50%;background:var(--primary-xlight);display:flex;align-items:center;justify-content:center;color:var(--primary);"><i class="fas fa-car"></i></div>
+    <div style="flex:1;"><div style="font-size:0.85rem;font-weight:600;">${r.depart||'—'} → ${r.arrivee||'—'}</div><div style="font-size:0.73rem;color:var(--gray);">${formatDate(r.date)} · ${r.distance||0} km</div></div>
+    <span style="font-weight:700;color:var(--success);">+${formatPrice(r.prix)}</span>
+  </div>`).join('');
+}
+
+function renderWeekChart(rides){
+  const days=['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'];
+  const maxGain=80;
+  const data=days.map((_,i)=>{
+    const g=rides.filter(r=>new Date(r.date).getDay()===(i+1)%7).reduce((s,r)=>s+r.prix,0);
+    return {day:days[i],gain:g};
+  });
+  const maxVal=Math.max(...data.map(d=>d.gain),1);
+  document.getElementById('week-chart').innerHTML=data.map(d=>`
+    <div class="ecb-col">
+      <div class="ecb-val">${d.gain?d.gain.toFixed(0)+'€':''}</div>
+      <div class="ecb-bar" style="height:${Math.max(4,(d.gain/maxVal)*100)}px;"></div>
+      <div class="ecb-label">${d.day}</div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>

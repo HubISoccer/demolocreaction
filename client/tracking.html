@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi en direct | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.tracking-layout{display:grid;grid-template-columns:380px 1fr;height:calc(100vh - var(--nav-h));gap:0;}
+.tracking-panel{padding:24px;overflow-y:auto;border-right:1px solid var(--gray-light);}
+.driver-card{background:linear-gradient(135deg,var(--primary),var(--primary-dark));border-radius:var(--radius-xl);padding:24px;margin-bottom:20px;position:relative;overflow:hidden;}
+.driver-card::before{content:'';position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,204,0,0.1);}
+.driver-top{display:flex;align-items:center;gap:16px;margin-bottom:16px;}
+.driver-avatar{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.15);border:3px solid var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:800;color:var(--gold);flex-shrink:0;}
+.driver-info{flex:1;}
+.driver-name{font-size:1.05rem;font-weight:800;color:#fff;}
+.driver-car{font-size:0.78rem;color:rgba(255,255,255,0.75);margin:2px 0;}
+.driver-rating{display:flex;align-items:center;gap:6px;font-size:0.82rem;color:var(--gold);font-weight:600;}
+.driver-contact{display:flex;gap:10px;margin-top:4px;}
+.driver-contact-btn{width:36px;height:36px;background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:0.85rem;cursor:pointer;transition:all 0.2s;}
+.driver-contact-btn:hover{background:rgba(255,255,255,0.25);}
+.driver-stats-row{display:flex;gap:12px;}
+.driver-stat{flex:1;background:rgba(255,255,255,0.1);border-radius:var(--radius);padding:10px;text-align:center;}
+.driver-stat .val{font-size:1.1rem;font-weight:800;color:var(--gold);}
+.driver-stat .lbl{font-size:0.68rem;color:rgba(255,255,255,0.65);}
+/* ETA card */
+.eta-card{background:var(--white);border:2px solid var(--primary);border-radius:var(--radius-xl);padding:20px;margin-bottom:20px;text-align:center;}
+.eta-label{font-size:0.8rem;color:var(--gray);margin-bottom:6px;}
+.eta-time{font-size:3rem;font-weight:900;color:var(--primary);line-height:1;}
+.eta-unit{font-size:1rem;font-weight:500;color:var(--gray);}
+.eta-progress{margin-top:14px;}
+.eta-desc{font-size:0.82rem;color:var(--gray-dark);margin-top:10px;}
+/* Route summary */
+.route-summary{background:var(--gray-xlight);border-radius:var(--radius-lg);padding:16px;margin-bottom:20px;}
+.route-point-row{display:flex;align-items:center;gap:12px;padding:6px 0;}
+.route-dot{width:12px;height:12px;border-radius:50%;flex-shrink:0;}
+.route-dot.start{background:var(--success);}
+.route-dot.end{background:var(--danger);}
+.route-line{width:2px;height:20px;background:var(--gray-light);margin-left:5px;}
+.route-text{font-size:0.87rem;font-weight:500;color:var(--dark);}
+.route-text small{display:block;font-size:0.73rem;color:var(--gray);}
+/* Status steps */
+.status-steps{margin-bottom:20px;}
+.status-step{display:flex;align-items:center;gap:14px;padding:12px;border-radius:var(--radius);margin-bottom:6px;transition:all 0.3s;}
+.status-step.done{background:var(--success-light);}
+.status-step.active{background:var(--primary-xlight);border:1px solid rgba(85,27,140,0.2);}
+.status-step.pending{opacity:0.5;}
+.step-icon{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.9rem;flex-shrink:0;}
+.status-step.done   .step-icon{background:var(--success);color:#fff;}
+.status-step.active .step-icon{background:var(--primary);color:#fff;}
+.status-step.pending .step-icon{background:var(--gray-light);color:var(--gray);}
+.step-info .title{font-size:0.87rem;font-weight:600;}
+.step-info .sub{font-size:0.73rem;color:var(--gray);}
+/* Map full */
+#tracking-map{flex:1;min-height:400px;}
+@media(max-width:900px){.tracking-layout{grid-template-columns:1fr;height:auto;flex-direction:column;} #tracking-map{height:320px;}}
+</style>
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Localisation…</div></div></div>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Suivi en direct</span>
+  </div>
+  <div class="nav-right">
+    <a href="dashboard.html" class="btn btn-outline" style="font-size:0.8rem;padding:7px 14px;"><i class="fas fa-arrow-left"></i> Retour</a>
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<div class="tracking-layout">
+  <!-- Panel -->
+  <div class="tracking-panel">
+    <!-- Driver card -->
+    <div class="driver-card">
+      <div class="driver-top">
+        <div class="driver-avatar" id="drv-avatar">RG</div>
+        <div class="driver-info">
+          <div class="driver-name" id="drv-name">Régine Gatibelza</div>
+          <div class="driver-car" id="drv-car">Mercedes Classe E · AA-123-BB</div>
+          <div class="driver-rating"><i class="fas fa-star"></i><span id="drv-note">4.9</span> (347 courses)</div>
+          <div class="driver-contact">
+            <button class="driver-contact-btn" title="Appeler" onclick="showToast('Appel en cours…','info')"><i class="fas fa-phone"></i></button>
+            <button class="driver-contact-btn" title="SMS" onclick="showToast('Message envoyé !','success')"><i class="fas fa-comment"></i></button>
+          </div>
+        </div>
+      </div>
+      <div class="driver-stats-row">
+        <div class="driver-stat"><div class="val" id="drv-courses">347</div><div class="lbl">Courses</div></div>
+        <div class="driver-stat"><div class="val" id="drv-plaque">AA-123-BB</div><div class="lbl">Plaque</div></div>
+        <div class="driver-stat"><div class="val">⭐ 4.9</div><div class="lbl">Note</div></div>
+      </div>
+    </div>
+
+    <!-- ETA -->
+    <div class="eta-card">
+      <div class="eta-label">Votre chauffeur arrive dans</div>
+      <div class="eta-time" id="eta-min">5</div><span class="eta-unit">minutes</span>
+      <div class="eta-progress">
+        <div class="progress-wrap"><div class="progress-bar primary" id="eta-bar" style="width:30%"></div></div>
+      </div>
+      <div class="eta-desc" id="eta-desc">Régine est à ~2.1 km — en route vers vous</div>
+    </div>
+
+    <!-- Route -->
+    <div class="route-summary">
+      <div class="route-point-row"><div class="route-dot start"></div><div class="route-text" id="track-depart">Chargement…<small>Point de départ</small></div></div>
+      <div class="route-line"></div>
+      <div class="route-point-row"><div class="route-dot end"></div><div class="route-text" id="track-arrivee">Chargement…<small>Destination</small></div></div>
+    </div>
+
+    <!-- Status steps -->
+    <div class="status-steps">
+      <div class="status-step done" id="step1">
+        <div class="step-icon"><i class="fas fa-check"></i></div>
+        <div class="step-info"><div class="title">Course commandée</div><div class="sub">Demande envoyée</div></div>
+      </div>
+      <div class="status-step done" id="step2">
+        <div class="step-icon"><i class="fas fa-check"></i></div>
+        <div class="step-info"><div class="title">Chauffeur assigné</div><div class="sub">Régine a accepté votre course</div></div>
+      </div>
+      <div class="status-step active" id="step3">
+        <div class="step-icon"><i class="fas fa-car"></i></div>
+        <div class="step-info"><div class="title">En route vers vous</div><div class="sub" id="step3-sub">Arrivée estimée : 5 min</div></div>
+      </div>
+      <div class="status-step pending" id="step4">
+        <div class="step-icon"><i class="fas fa-route"></i></div>
+        <div class="step-info"><div class="title">Course en cours</div><div class="sub">Trajet vers destination</div></div>
+      </div>
+      <div class="status-step pending" id="step5">
+        <div class="step-icon"><i class="fas fa-flag-checkered"></i></div>
+        <div class="step-info"><div class="title">Arrivée à destination</div><div class="sub">Course terminée</div></div>
+      </div>
+    </div>
+
+    <button class="btn btn-danger btn-full" id="btn-cancel" onclick="cancelRide()"><i class="fas fa-times-circle"></i> Annuler la course</button>
+  </div>
+
+  <!-- Map -->
+  <div id="tracking-map"></div>
+</div>
+
+<!-- Rating modal -->
+<div class="modal-overlay" id="rating-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🎉 Course terminée !</div>
+    </div>
+    <div class="modal-body">
+      <div style="text-align:center;margin-bottom:20px;">
+        <div style="font-size:3rem;margin-bottom:8px;">⭐</div>
+        <p style="font-size:0.9rem;color:var(--gray);">Comment s'est passée votre course avec <strong id="rating-driver">Régine</strong> ?</p>
+      </div>
+      <div style="display:flex;justify-content:center;gap:12px;margin-bottom:20px;" id="stars-row">
+        <span style="font-size:2.5rem;cursor:pointer;" onclick="setNote(1)" onmouseover="hoverNote(1)">☆</span>
+        <span style="font-size:2.5rem;cursor:pointer;" onclick="setNote(2)" onmouseover="hoverNote(2)">☆</span>
+        <span style="font-size:2.5rem;cursor:pointer;" onclick="setNote(3)" onmouseover="hoverNote(3)">☆</span>
+        <span style="font-size:2.5rem;cursor:pointer;" onclick="setNote(4)" onmouseover="hoverNote(4)">☆</span>
+        <span style="font-size:2.5rem;cursor:pointer;" onclick="setNote(5)" onmouseover="hoverNote(5)">☆</span>
+      </div>
+      <div style="background:var(--primary-xlight);border-radius:var(--radius);padding:14px;text-align:center;">
+        <div style="font-size:0.8rem;color:var(--gray);">Montant débité</div>
+        <div style="font-size:1.6rem;font-weight:800;color:var(--primary);" id="rating-price">—</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary btn-full" onclick="submitRating()"><i class="fas fa-paper-plane"></i> Envoyer mon avis</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, activeRide, map, carMarker, userMarker, etaCountdown = 5, rideNote = 5;
+
+window.addEventListener('DOMContentLoaded', () => {
+  session = LR.requireAuth('client');
+  if (!session) return;
+  document.getElementById('nav-avatar').textContent = session.avatar;
+
+  // Find active/accepted ride
+  activeRide = LR.getRides().find(r => r.clientId === session.userId && ['accepte','en_attente','en_cours'].includes(r.statut));
+  if (!activeRide) {
+    // Use last ride for demo
+    activeRide = LR.getRides().filter(r => r.clientId === session.userId).slice(-1)[0] || { depart:'Bastille, Paris', arrivee:'Aéroport CDG', prix:28.50, chauffeurId:'u2', statut:'accepte' };
+  }
+
+  // Fill route
+  document.getElementById('track-depart').innerHTML = (activeRide.depart||'Départ') + '<small>Point de départ</small>';
+  document.getElementById('track-arrivee').innerHTML = (activeRide.arrivee||'Arrivée') + '<small>Destination</small>';
+  document.getElementById('rating-price').textContent = formatPrice(activeRide.prix||28.50);
+
+  // Fill driver info
+  if (activeRide.chauffeurId) {
+    const drv = LR.getUserById(activeRide.chauffeurId);
+    if (drv) {
+      document.getElementById('drv-avatar').textContent = drv.avatar||'?';
+      document.getElementById('drv-name').textContent = `${drv.prenom} ${drv.nom}`;
+      document.getElementById('drv-car').textContent = `${drv.voiture||'Véhicule'} · ${drv.plaque||'—'}`;
+      document.getElementById('drv-note').textContent = drv.note||4.9;
+      document.getElementById('drv-courses').textContent = drv.coursesTotal||0;
+      document.getElementById('drv-plaque').textContent = drv.plaque||'—';
+      document.getElementById('rating-driver').textContent = drv.prenom;
+    }
+  }
+
+  initMap();
+  startSimulation();
+  hideLoader();
+});
+
+function initMap() {
+  map = L.map('tracking-map').setView([48.855, 2.345], 14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OSM' }).addTo(map);
+
+  // User marker
+  const userIcon = L.divIcon({ html:'<div style="width:36px;height:36px;background:#27ae60;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;border:3px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,0.4)"><i class="fas fa-user" style="font-size:14px;"></i></div>', iconSize:[36,36], iconAnchor:[18,18], className:'' });
+  userMarker = L.marker([48.853, 2.350], { icon:userIcon }).addTo(map).bindPopup('📍 Vous êtes ici');
+
+  // Car marker
+  const carIcon = L.divIcon({ html:'<div style="width:40px;height:40px;background:#551B8C;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#FFCC00;font-size:1rem;border:3px solid #fff;box-shadow:0 2px 12px rgba(85,27,140,0.5);animation:pulse 1.5s infinite"><i class="fas fa-car" style="font-size:16px;"></i></div>', iconSize:[40,40], iconAnchor:[20,20], className:'' });
+  carMarker = L.marker([48.870, 2.338], { icon:carIcon }).addTo(map).bindPopup('🚗 Régine — en route');
+
+  // Destination marker
+  const destIcon = L.divIcon({ html:'<div style="width:36px;height:36px;background:#e74c3c;border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1rem;border:3px solid #fff;box-shadow:0 2px 12px rgba(0,0,0,0.4)"><i class="fas fa-flag-checkered" style="font-size:14px;"></i></div>', iconSize:[36,36], iconAnchor:[18,36], className:'' });
+  L.marker([48.840, 2.360], { icon:destIcon }).addTo(map).bindPopup('🏁 ' + (activeRide.arrivee||'Destination'));
+
+  // Pulse CSS
+  const style = document.createElement('style');
+  style.textContent = '@keyframes pulse{0%,100%{box-shadow:0 2px 12px rgba(85,27,140,0.5)}50%{box-shadow:0 0 0 8px rgba(85,27,140,0.2),0 2px 12px rgba(85,27,140,0.5)}}';
+  document.head.appendChild(style);
+}
+
+let simStep = 0;
+const carPath = [
+  [48.870, 2.338],[48.867, 2.340],[48.864, 2.342],[48.861, 2.344],[48.858, 2.346],[48.855, 2.348],[48.853, 2.350]
+];
+
+function startSimulation() {
+  const interval = setInterval(() => {
+    simStep++;
+    if (simStep < carPath.length) {
+      carMarker.setLatLng(carPath[simStep]);
+      etaCountdown = Math.max(0, 5 - simStep);
+      document.getElementById('eta-min').textContent = etaCountdown;
+      document.getElementById('eta-bar').style.width = ((simStep/carPath.length)*100)+'%';
+      document.getElementById('step3-sub').textContent = `Arrivée estimée : ${etaCountdown} min`;
+      const distKm = (+(2.1 - simStep*0.3).toFixed(1)).toFixed(1);
+      document.getElementById('eta-desc').textContent = `Votre chauffeur est à ~${Math.max(0.2, distKm)} km`;
+    }
+    if (simStep === carPath.length) {
+      // Driver arrived
+      clearInterval(interval);
+      document.getElementById('step3').className = 'status-step done';
+      document.getElementById('step3').querySelector('.step-icon').innerHTML = '<i class="fas fa-check"></i>';
+      document.getElementById('step4').className = 'status-step active';
+      document.getElementById('step4').querySelector('.step-icon').innerHTML = '<i class="fas fa-route"></i>';
+      document.getElementById('eta-min').textContent = '0';
+      document.getElementById('btn-cancel').style.display = 'none';
+      document.getElementById('eta-desc').textContent = 'Votre chauffeur est arrivé !';
+      showToast('🚗 Votre chauffeur est là !', 'success');
+      // After 5s, simulate ride ending
+      setTimeout(() => {
+        document.getElementById('step4').className = 'status-step done';
+        document.getElementById('step4').querySelector('.step-icon').innerHTML = '<i class="fas fa-check"></i>';
+        document.getElementById('step5').className = 'status-step done';
+        document.getElementById('step5').querySelector('.step-icon').innerHTML = '<i class="fas fa-check"></i>';
+        document.getElementById('eta-label').textContent = 'Course terminée !';
+        document.getElementById('eta-min').textContent = '✓';
+        // Debit wallet
+        LR.debitWallet(session.userId, activeRide.prix||28.50, `Course ${activeRide.depart||'Départ'} → ${activeRide.arrivee||'Arrivée'}`);
+        LR.updateRide(activeRide.id, { statut:'termine' });
+        setTimeout(() => document.getElementById('rating-modal').classList.add('open'), 1000);
+      }, 6000);
+    }
+  }, 2000);
+}
+
+function cancelRide() {
+  if (!confirm('Annuler la course ?')) return;
+  if (activeRide && activeRide.id) LR.updateRide(activeRide.id, { statut:'annule' });
+  showToast('Course annulée.', 'warning');
+  setTimeout(() => window.location.href = 'dashboard.html', 1500);
+}
+
+let selectedNote = 5;
+function hoverNote(n) {
+  const stars = document.getElementById('stars-row').children;
+  for (let i=0;i<5;i++) stars[i].textContent = i<n ? '★' : '☆';
+}
+function setNote(n) {
+  selectedNote = n;
+  hoverNote(n);
+}
+function submitRating() {
+  if (activeRide && activeRide.id) LR.updateRide(activeRide.id, { noteClient:selectedNote });
+  showToast(`Merci pour votre ${selectedNote}⭐ !`, 'success');
+  document.getElementById('rating-modal').classList.remove('open');
+  setTimeout(() => window.location.href = 'history.html', 1500);
+}
+</script>
+</body>
+</html>

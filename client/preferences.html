@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Préférences de bord | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.pref-section{background:var(--white);border:1px solid var(--gray-light);border-radius:var(--radius-xl);padding:24px;margin-bottom:20px;box-shadow:var(--shadow-sm);}
+.pref-section-title{font-size:0.85rem;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:0.6px;margin-bottom:18px;display:flex;align-items:center;gap:8px;padding-bottom:10px;border-bottom:2px solid var(--primary-xlight);}
+.pref-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--gray-xlight);}
+.pref-row:last-child{border-bottom:none;}
+.pref-label{display:flex;align-items:center;gap:12px;}
+.pref-label-icon{width:40px;height:40px;border-radius:var(--radius);background:var(--primary-xlight);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:1rem;flex-shrink:0;}
+.pref-label-text .title{font-size:0.87rem;font-weight:600;color:var(--dark);}
+.pref-label-text .sub{font-size:0.75rem;color:var(--gray);}
+.range-wrap{display:flex;align-items:center;gap:14px;min-width:200px;}
+.range-wrap input[type=range]{flex:1;accent-color:var(--primary);height:4px;}
+.range-val{font-size:0.9rem;font-weight:700;color:var(--primary);min-width:40px;text-align:right;}
+.music-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:8px;}
+.music-btn{padding:10px 8px;border:1.5px solid var(--gray-light);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all 0.2s;font-size:0.78rem;font-weight:600;color:var(--gray-dark);}
+.music-btn.selected{border-color:var(--primary);background:var(--primary-xlight);color:var(--primary);}
+.music-btn .icon{font-size:1.2rem;margin-bottom:4px;}
+.pref-save-bar{position:sticky;bottom:0;background:var(--white);border-top:1px solid var(--gray-light);padding:16px 32px;display:flex;align-items:center;justify-content:space-between;z-index:10;box-shadow:0 -4px 16px rgba(0,0,0,0.06);}
+.unsaved-dot{width:8px;height:8px;border-radius:50%;background:var(--warning);display:none;}
+.unsaved-dot.show{display:inline-block;}
+</style>
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="dashboard.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Préférences de bord</span>
+  </div>
+  <div class="nav-right">
+    <div class="nav-user-info"><div class="nav-avatar" id="nav-avatar">?</div><div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Client</div></div></div>
+    <button class="nav-btn-icon" onclick="LR.logout()"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<div class="dashboard-wrap">
+  <aside class="sidebar">
+    <div class="profile-sidebar"><div class="profile-sidebar-avatar" id="sidebar-avatar">?</div><div class="profile-sidebar-name" id="sidebar-name">—</div><div class="profile-sidebar-role">Client VTC</div></div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-home"></i> Réserver</a></li>
+        <li><a href="tracking.html"><i class="fas fa-map-marker-alt"></i> Suivi en direct</a></li>
+        <li><a href="wallet.html"><i class="fas fa-wallet"></i> Mon Portefeuille</a></li>
+        <li><a href="history.html"><i class="fas fa-history"></i> Historique</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Mon compte</div>
+      <ul class="sidebar-menu">
+        <li><a href="profile.html"><i class="fas fa-user-cog"></i> Profil</a></li>
+        <li><a href="favorites.html"><i class="fas fa-heart"></i> Chauffeurs favoris</a></li>
+        <li><a href="preferences.html" class="active"><i class="fas fa-sliders-h"></i> Préférences</a></li>
+        <li><a href="../index.html" onclick="LR.logout();return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <main class="main-content" style="padding-bottom:80px;">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+
+      <!-- Confort habitacle -->
+      <div>
+        <div class="pref-section">
+          <div class="pref-section-title"><i class="fas fa-thermometer-half"></i> Confort habitacle</div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-temperature-low"></i></div>
+              <div class="pref-label-text"><div class="title">Température</div><div class="sub">Préférence de climatisation</div></div>
+            </div>
+            <div class="range-wrap">
+              <input type="range" min="16" max="28" value="22" id="pref-temp" oninput="updateRange(this,'temp-val','°C');markDirty()">
+              <span class="range-val" id="temp-val">22°C</span>
+            </div>
+          </div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-volume-down"></i></div>
+              <div class="pref-label-text"><div class="title">Niveau sonore</div><div class="sub">Volume ambiant souhaité</div></div>
+            </div>
+            <div class="range-wrap">
+              <input type="range" min="0" max="100" value="30" id="pref-volume" oninput="updateRange(this,'vol-val','%');markDirty()">
+              <span class="range-val" id="vol-val">30%</span>
+            </div>
+          </div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-wind"></i></div>
+              <div class="pref-label-text"><div class="title">Ventilation</div><div class="sub">Niveau de ventilation</div></div>
+            </div>
+            <div class="range-wrap">
+              <input type="range" min="0" max="5" value="2" id="pref-vent" oninput="updateRange(this,'vent-val','');markDirty()">
+              <span class="range-val" id="vent-val">2</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Musique -->
+        <div class="pref-section">
+          <div class="pref-section-title"><i class="fas fa-music"></i> Ambiance musicale</div>
+          <p style="font-size:0.82rem;color:var(--gray);margin-bottom:14px;">Quel genre de musique souhaitez-vous pendant vos trajets ?</p>
+          <div class="music-grid" id="music-grid">
+            <div class="music-btn selected" data-music="silence" onclick="selectMusic(this)"><div class="icon">🔇</div>Silence</div>
+            <div class="music-btn" data-music="jazz" onclick="selectMusic(this)"><div class="icon">🎷</div>Jazz</div>
+            <div class="music-btn" data-music="classique" onclick="selectMusic(this)"><div class="icon">🎻</div>Classique</div>
+            <div class="music-btn" data-music="pop" onclick="selectMusic(this)"><div class="icon">🎵</div>Pop</div>
+            <div class="music-btn" data-music="rnb" onclick="selectMusic(this)"><div class="icon">🎤</div>R&B</div>
+            <div class="music-btn" data-music="lofi" onclick="selectMusic(this)"><div class="icon">🎧</div>Lo-Fi</div>
+            <div class="music-btn" data-music="radio" onclick="selectMusic(this)"><div class="icon">📻</div>Radio</div>
+            <div class="music-btn" data-music="autre" onclick="selectMusic(this)"><div class="icon">🎼</div>Autre</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Comportement & notifications -->
+      <div>
+        <div class="pref-section">
+          <div class="pref-section-title"><i class="fas fa-user-friends"></i> Comportement & interaction</div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-comments"></i></div>
+              <div class="pref-label-text"><div class="title">Conversation</div><div class="sub">Discuter avec le chauffeur</div></div>
+            </div>
+            <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="pref-talk" checked onchange="markDirty()"><span class="toggle-slider"></span></label></label>
+          </div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-route"></i></div>
+              <div class="pref-label-text"><div class="title">Partage de trajet</div><div class="sub">Autoriser le partage de position</div></div>
+            </div>
+            <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="pref-share" checked onchange="markDirty()"><span class="toggle-slider"></span></label></label>
+          </div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-wheelchair"></i></div>
+              <div class="pref-label-text"><div class="title">Accessibilité PMR</div><div class="sub">Véhicule adapté PMR</div></div>
+            </div>
+            <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="pref-pmr" onchange="markDirty()"><span class="toggle-slider"></span></label></label>
+          </div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-dog"></i></div>
+              <div class="pref-label-text"><div class="title">Animaux acceptés</div><div class="sub">Voyager avec un animal</div></div>
+            </div>
+            <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="pref-pet" onchange="markDirty()"><span class="toggle-slider"></span></label></label>
+          </div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-baby"></i></div>
+              <div class="pref-label-text"><div class="title">Siège bébé</div><div class="sub">Demander un siège enfant</div></div>
+            </div>
+            <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="pref-baby" onchange="markDirty()"><span class="toggle-slider"></span></label></label>
+          </div>
+        </div>
+
+        <!-- Notifications -->
+        <div class="pref-section">
+          <div class="pref-section-title"><i class="fas fa-bell"></i> Notifications</div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-car"></i></div>
+              <div class="pref-label-text"><div class="title">Arrivée du chauffeur</div><div class="sub">Push notification</div></div>
+            </div>
+            <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="notif-arrival" checked onchange="markDirty()"><span class="toggle-slider"></span></label></label>
+          </div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-receipt"></i></div>
+              <div class="pref-label-text"><div class="title">Reçu de course</div><div class="sub">Envoyer par email</div></div>
+            </div>
+            <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="notif-receipt" checked onchange="markDirty()"><span class="toggle-slider"></span></label></label>
+          </div>
+          <div class="pref-row">
+            <div class="pref-label">
+              <div class="pref-label-icon"><i class="fas fa-tag"></i></div>
+              <div class="pref-label-text"><div class="title">Offres & promotions</div><div class="sub">Emails marketing</div></div>
+            </div>
+            <label class="toggle-wrap"><label class="toggle-switch"><input type="checkbox" id="notif-promo" onchange="markDirty()"><span class="toggle-slider"></span></label></label>
+          </div>
+        </div>
+
+        <!-- Note perso -->
+        <div class="pref-section">
+          <div class="pref-section-title"><i class="fas fa-sticky-note"></i> Note pour les chauffeurs</div>
+          <p style="font-size:0.82rem;color:var(--gray);margin-bottom:12px;">Message automatiquement envoyé à chaque chauffeur avant votre montée.</p>
+          <textarea id="pref-note" rows="3" style="width:100%;padding:12px;border:1.5px solid var(--gray-light);border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:0.87rem;outline:none;resize:vertical;" placeholder="Ex : Je serai devant l'entrée principale avec un bagage…" oninput="markDirty()"></textarea>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Save bar -->
+<div class="pref-save-bar">
+  <div style="display:flex;align-items:center;gap:10px;">
+    <div class="unsaved-dot" id="unsaved-dot"></div>
+    <span style="font-size:0.85rem;color:var(--gray);" id="save-status">Préférences enregistrées</span>
+  </div>
+  <div style="display:flex;gap:10px;">
+    <button class="btn btn-outline-gray" onclick="resetPrefs()"><i class="fas fa-undo"></i> Réinitialiser</button>
+    <button class="btn btn-primary" onclick="savePrefs()"><i class="fas fa-save"></i> Enregistrer</button>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="../assets/js/store.js"></script>
+<script>
+const PREFS_KEY = 'lr_prefs_';
+let session, dirty = false;
+
+window.addEventListener('DOMContentLoaded', () => {
+  session = LR.requireAuth('client'); if (!session) return;
+  document.getElementById('nav-avatar').textContent = session.avatar;
+  document.getElementById('nav-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent = session.avatar;
+  document.getElementById('sidebar-name').textContent = `${session.prenom} ${session.nom}`;
+  loadPrefs();
+  hideLoader();
+});
+
+function updateRange(el, valId, suffix) {
+  document.getElementById(valId).textContent = el.value + suffix;
+}
+
+function selectMusic(el) {
+  document.querySelectorAll('.music-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  markDirty();
+}
+
+function markDirty() {
+  dirty = true;
+  document.getElementById('unsaved-dot').classList.add('show');
+  document.getElementById('save-status').textContent = 'Modifications non enregistrées';
+}
+
+function loadPrefs() {
+  const prefs = JSON.parse(localStorage.getItem(PREFS_KEY + session.userId) || '{}');
+  if (prefs.temp) { document.getElementById('pref-temp').value = prefs.temp; document.getElementById('temp-val').textContent = prefs.temp + '°C'; }
+  if (prefs.volume !== undefined) { document.getElementById('pref-volume').value = prefs.volume; document.getElementById('vol-val').textContent = prefs.volume + '%'; }
+  if (prefs.vent !== undefined) { document.getElementById('pref-vent').value = prefs.vent; document.getElementById('vent-val').textContent = prefs.vent; }
+  if (prefs.music) { document.querySelectorAll('.music-btn').forEach(b => { b.classList.toggle('selected', b.dataset.music === prefs.music); }); }
+  if (prefs.talk !== undefined) document.getElementById('pref-talk').checked = prefs.talk;
+  if (prefs.share !== undefined) document.getElementById('pref-share').checked = prefs.share;
+  if (prefs.pmr !== undefined) document.getElementById('pref-pmr').checked = prefs.pmr;
+  if (prefs.pet !== undefined) document.getElementById('pref-pet').checked = prefs.pet;
+  if (prefs.baby !== undefined) document.getElementById('pref-baby').checked = prefs.baby;
+  if (prefs.notifArrival !== undefined) document.getElementById('notif-arrival').checked = prefs.notifArrival;
+  if (prefs.notifReceipt !== undefined) document.getElementById('notif-receipt').checked = prefs.notifReceipt;
+  if (prefs.notifPromo !== undefined) document.getElementById('notif-promo').checked = prefs.notifPromo;
+  if (prefs.note) document.getElementById('pref-note').value = prefs.note;
+}
+
+function savePrefs() {
+  const music = document.querySelector('.music-btn.selected')?.dataset.music || 'silence';
+  const prefs = {
+    temp: document.getElementById('pref-temp').value,
+    volume: document.getElementById('pref-volume').value,
+    vent: document.getElementById('pref-vent').value,
+    music,
+    talk: document.getElementById('pref-talk').checked,
+    share: document.getElementById('pref-share').checked,
+    pmr: document.getElementById('pref-pmr').checked,
+    pet: document.getElementById('pref-pet').checked,
+    baby: document.getElementById('pref-baby').checked,
+    notifArrival: document.getElementById('notif-arrival').checked,
+    notifReceipt: document.getElementById('notif-receipt').checked,
+    notifPromo: document.getElementById('notif-promo').checked,
+    note: document.getElementById('pref-note').value,
+  };
+  localStorage.setItem(PREFS_KEY + session.userId, JSON.stringify(prefs));
+  dirty = false;
+  document.getElementById('unsaved-dot').classList.remove('show');
+  document.getElementById('save-status').textContent = 'Préférences enregistrées ✓';
+  showToast('Préférences sauvegardées !', 'success');
+}
+
+function resetPrefs() {
+  if (!confirm('Réinitialiser toutes les préférences ?')) return;
+  localStorage.removeItem(PREFS_KEY + session.userId);
+  location.reload();
+}
+</script>
+</body>
+</html>

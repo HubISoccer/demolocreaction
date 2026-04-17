@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Réserver une course | Loc'Reaction</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<link rel="stylesheet" href="../assets/css/main.css">
+<style>
+.booking-grid{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start;}
+.booking-form-card{background:var(--bg-card);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);border:1px solid var(--gray-light);overflow:hidden;position:sticky;top:calc(var(--nav-h)+20px);}
+.booking-form-header{background:linear-gradient(135deg,var(--primary),var(--primary-dark));padding:20px 24px;}
+.booking-form-header h2{font-size:1rem;font-weight:700;color:#fff;display:flex;align-items:center;gap:8px;}
+.booking-form-header p{font-size:0.78rem;color:rgba(255,255,255,0.7);margin-top:2px;}
+.booking-form-body{padding:24px;}
+.ride-type-tabs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:20px;}
+.ride-type-tab{padding:12px;border:1.5px solid var(--gray-light);border-radius:var(--radius);text-align:center;cursor:pointer;transition:all 0.2s;}
+.ride-type-tab.active{border-color:var(--primary);background:var(--primary-xlight);}
+.ride-type-tab i{font-size:1.3rem;color:var(--primary);margin-bottom:6px;}
+.ride-type-tab span{display:block;font-size:0.8rem;font-weight:600;color:var(--dark);}
+.route-box{background:var(--gray-xlight);border-radius:var(--radius-lg);padding:16px;margin-bottom:16px;}
+.route-point{display:flex;align-items:center;gap:12px;padding:8px 0;}
+.route-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.85rem;flex-shrink:0;}
+.route-icon.depart{background:var(--success-light);color:var(--success);}
+.route-icon.arrivee{background:var(--danger-light);color:var(--danger);}
+.route-input{flex:1;background:var(--white);border:1.5px solid var(--gray-light);border-radius:var(--radius-sm);padding:10px 14px;font-size:0.87rem;color:var(--dark);outline:none;transition:all 0.2s;font-family:'Poppins',sans-serif;}
+.route-input:focus{border-color:var(--primary);}
+.route-divider{width:2px;height:20px;background:var(--gray-light);margin-left:15px;margin-top:-4px;margin-bottom:-4px;}
+.route-swap{width:32px;height:32px;background:var(--white);border:1.5px solid var(--gray-light);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gray);transition:all 0.2s;margin-left:auto;margin-right:0;}
+.route-swap:hover{background:var(--primary-xlight);color:var(--primary);border-color:var(--primary);}
+.vehicle-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;}
+.vehicle-card{padding:12px;border:1.5px solid var(--gray-light);border-radius:var(--radius);cursor:pointer;transition:all 0.2s;text-align:center;}
+.vehicle-card.selected{border-color:var(--primary);background:var(--primary-xlight);}
+.vehicle-card .vc-icon{font-size:1.6rem;margin-bottom:6px;}
+.vehicle-card .vc-name{font-size:0.8rem;font-weight:700;color:var(--dark);}
+.vehicle-card .vc-info{font-size:0.7rem;color:var(--gray);}
+.vehicle-card .vc-price{font-size:0.8rem;font-weight:700;color:var(--primary);margin-top:4px;}
+.price-estimate{background:linear-gradient(135deg,var(--primary-xlight),var(--gold-light));border:1px solid rgba(85,27,140,0.15);border-radius:var(--radius);padding:14px;margin-bottom:16px;display:none;}
+.price-estimate.show{display:flex;align-items:center;justify-content:space-between;}
+.pe-label{font-size:0.8rem;color:var(--gray-dark);}
+.pe-price{font-size:1.5rem;font-weight:800;color:var(--primary);}
+.pe-details{font-size:0.72rem;color:var(--gray);}
+.wallet-balance-row{display:flex;align-items:center;justify-content:space-between;background:var(--gray-xlight);padding:10px 14px;border-radius:var(--radius-sm);margin-bottom:16px;font-size:0.82rem;}
+.wbr-label{color:var(--gray-dark);font-weight:500;}
+.wbr-val{font-weight:700;color:var(--dark);}
+.wbr-val i{color:var(--gold-dark);margin-right:4px;}
+/* Suggestions */
+.suggestions-list{position:absolute;top:100%;left:0;right:0;background:var(--white);border:1.5px solid var(--primary);border-radius:var(--radius-sm);box-shadow:var(--shadow-md);z-index:200;list-style:none;overflow:hidden;margin-top:2px;}
+.suggestions-list li{padding:11px 14px;cursor:pointer;font-size:0.85rem;display:flex;align-items:center;gap:10px;transition:background 0.15s;}
+.suggestions-list li:hover{background:var(--primary-xlight);}
+.suggestions-list li i{color:var(--gray);font-size:0.85rem;}
+/* Recent rides */
+.recent-ride-item{display:flex;align-items:center;gap:14px;padding:14px 0;border-bottom:1px solid var(--gray-xlight);}
+.recent-ride-item:last-child{border-bottom:none;}
+.rri-icon{width:40px;height:40px;border-radius:50%;background:var(--primary-xlight);display:flex;align-items:center;justify-content:center;color:var(--primary);font-size:0.9rem;flex-shrink:0;}
+.rri-info{flex:1;min-width:0;}
+.rri-route{font-size:0.85rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rri-sub{font-size:0.75rem;color:var(--gray);}
+.rri-price{font-size:0.88rem;font-weight:700;color:var(--primary);}
+@media(max-width:900px){.booking-grid{grid-template-columns:1fr;} .booking-form-card{position:static;}}
+</style>
+</head>
+<body>
+<div id="global-loader" class="global-loader"><div class="loader-inner"><div class="spinner"></div><div class="loader-text">Chargement…</div></div></div>
+
+<!-- NAVBAR -->
+<nav class="dashboard-nav">
+  <div class="nav-left">
+    <a href="../index.html" class="nav-logo"><div class="nav-logo-icon"><i class="fas fa-bolt"></i></div>Loc'<span>Reaction</span></a>
+    <span class="nav-title">Espace Client</span>
+  </div>
+  <div class="nav-right">
+    <button class="nav-btn-icon" title="Notifications"><i class="fas fa-bell"></i><span class="nav-badge">2</span></button>
+    <div class="nav-user-info" id="nav-user">
+      <div class="nav-avatar" id="nav-avatar">?</div>
+      <div><div class="nav-user-name" id="nav-name">—</div><div class="nav-user-role">Client</div></div>
+    </div>
+    <button class="nav-btn-icon" onclick="LR.logout()" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<div class="dashboard-wrap">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="profile-sidebar" id="sidebar-profile">
+      <div class="profile-sidebar-avatar" id="sidebar-avatar">?</div>
+      <div class="profile-sidebar-name" id="sidebar-name">—</div>
+      <div class="profile-sidebar-role">Client VTC</div>
+      <div class="profile-sidebar-stat">
+        <div class="profile-sidebar-stat-item"><div class="val" id="sidebar-courses">0</div><div class="lbl">Courses</div></div>
+        <div class="profile-sidebar-stat-item"><div class="val" id="sidebar-solde">—</div><div class="lbl">Solde</div></div>
+        <div class="profile-sidebar-stat-item"><div class="val">★ 5.0</div><div class="lbl">Ma note</div></div>
+      </div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Navigation</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html" class="active"><i class="fas fa-home"></i> Réserver</a></li>
+        <li><a href="tracking.html"><i class="fas fa-map-marker-alt"></i> Suivi en direct</a></li>
+        <li><a href="wallet.html"><i class="fas fa-wallet"></i> Mon Portefeuille</a></li>
+        <li><a href="history.html"><i class="fas fa-history"></i> Historique</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-label">Mon compte</div>
+      <ul class="sidebar-menu">
+        <li><a href="#"><i class="fas fa-user-cog"></i> Profil</a></li>
+        <li><a href="#"><i class="fas fa-heart"></i> Chauffeurs favoris</a></li>
+        <li><a href="#"><i class="fas fa-sliders-h"></i> Préférences</a></li>
+        <li><a href="../index.html" onclick="LR.logout(); return false;"><i class="fas fa-sign-out-alt"></i> Déconnexion</a></li>
+      </ul>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main-content">
+    <!-- Stats -->
+    <div class="stats-grid">
+      <div class="stat-card"><div class="stat-icon purple"><i class="fas fa-route"></i></div><div><div class="stat-value" id="s-courses">0</div><div class="stat-label">Courses totales</div></div></div>
+      <div class="stat-card"><div class="stat-icon gold"><i class="fas fa-wallet"></i></div><div><div class="stat-value" id="s-solde">0€</div><div class="stat-label">Solde portefeuille</div></div></div>
+      <div class="stat-card"><div class="stat-icon green"><i class="fas fa-star"></i></div><div><div class="stat-value">4.9</div><div class="stat-label">Ma note moyenne</div></div></div>
+      <div class="stat-card"><div class="stat-icon blue"><i class="fas fa-clock"></i></div><div><div class="stat-value">~5 min</div><div class="stat-label">Attente estimée</div></div></div>
+    </div>
+
+    <div class="booking-grid">
+      <!-- Booking form -->
+      <div>
+        <div class="booking-form-card">
+          <div class="booking-form-header">
+            <h2><i class="fas fa-bolt"></i> Nouvelle course</h2>
+            <p>Commandez votre chauffeur en 30 secondes</p>
+          </div>
+          <div class="booking-form-body">
+            <div class="ride-type-tabs">
+              <div class="ride-type-tab active" onclick="setType('immediat',this)">
+                <i class="fas fa-bolt"></i>
+                <span>Immédiate</span>
+              </div>
+              <div class="ride-type-tab" onclick="setType('programme',this)">
+                <i class="fas fa-calendar-alt"></i>
+                <span>Programmée</span>
+              </div>
+            </div>
+            <div id="date-group" class="form-group" style="display:none;">
+              <label class="form-label">Date & Heure <span style="color:var(--danger)">*</span></label>
+              <div class="form-icon-wrap"><i class="fas fa-clock"></i><input type="datetime-local" id="ride-date" class="form-control" style="padding-left:44px;"></div>
+            </div>
+            <div class="route-box">
+              <div class="route-point" style="position:relative;">
+                <div class="route-icon depart"><i class="fas fa-circle"></i></div>
+                <div style="flex:1;position:relative;">
+                  <input class="route-input" id="depart-input" type="text" placeholder="Point de départ…" oninput="autocomplete(this,'depart-sugg')" autocomplete="off">
+                  <ul class="suggestions-list" id="depart-sugg" style="display:none;"></ul>
+                </div>
+                <div class="route-swap" onclick="swapLocations()" title="Inverser"><i class="fas fa-exchange-alt"></i></div>
+              </div>
+              <div class="route-divider"></div>
+              <div class="route-point" style="position:relative;">
+                <div class="route-icon arrivee"><i class="fas fa-map-marker-alt"></i></div>
+                <div style="flex:1;position:relative;">
+                  <input class="route-input" id="arrivee-input" type="text" placeholder="Destination…" oninput="autocomplete(this,'arrivee-sugg')" autocomplete="off">
+                  <ul class="suggestions-list" id="arrivee-sugg" style="display:none;"></ul>
+                </div>
+              </div>
+            </div>
+            <div class="vehicle-grid">
+              <div class="vehicle-card selected" onclick="selectVehicle('berline',this)">
+                <div class="vc-icon">🚗</div>
+                <div class="vc-name">Berline</div>
+                <div class="vc-info">1-3 pass.</div>
+                <div class="vc-price">À partir de 12€</div>
+              </div>
+              <div class="vehicle-card" onclick="selectVehicle('van',this)">
+                <div class="vc-icon">🚐</div>
+                <div class="vc-name">Van / SUV</div>
+                <div class="vc-info">1-7 pass.</div>
+                <div class="vc-price">À partir de 18€</div>
+              </div>
+            </div>
+            <div class="price-estimate" id="price-estimate">
+              <div><div class="pe-label">Estimation</div><div class="pe-details" id="pe-details">—</div></div>
+              <div class="pe-price" id="pe-price">0 €</div>
+            </div>
+            <div class="wallet-balance-row">
+              <span class="wbr-label"><i class="fas fa-wallet" style="color:var(--gold-dark);margin-right:6px;"></i>Solde disponible</span>
+              <span class="wbr-val"><i class="fas fa-coins"></i><span id="wbr-solde">150,00 €</span></span>
+            </div>
+            <button class="btn btn-primary btn-full btn-lg" id="btn-book" onclick="bookRide()">
+              <i class="fas fa-bolt"></i> Commander maintenant
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Map + Recents -->
+      <div>
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:24px;">
+          <div id="main-map" style="height:340px;border-radius:var(--radius-lg);"></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div><div class="card-title"><i class="fas fa-history" style="color:var(--primary);margin-right:8px;"></i>Courses récentes</div></div>
+            <a href="history.html" class="section-action">Voir tout</a>
+          </div>
+          <div id="recent-rides-list">
+            <div class="empty-state" style="padding:24px;"><i class="fas fa-route"></i><p>Aucune course récente</p></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal confirmation -->
+<div class="modal-overlay" id="confirm-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title"><i class="fas fa-car" style="color:var(--primary);margin-right:8px;"></i>Confirmer la course</div>
+      <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="modal-body">
+      <div style="display:flex;flex-direction:column;gap:14px;">
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--gray-xlight);border-radius:var(--radius);">
+          <i class="fas fa-circle" style="color:var(--success);"></i>
+          <div><div style="font-size:0.75rem;color:var(--gray);">Départ</div><div style="font-weight:600;font-size:0.9rem;" id="modal-depart">—</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--gray-xlight);border-radius:var(--radius);">
+          <i class="fas fa-map-marker-alt" style="color:var(--danger);"></i>
+          <div><div style="font-size:0.75rem;color:var(--gray);">Arrivée</div><div style="font-weight:600;font-size:0.9rem;" id="modal-arrivee">—</div></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:16px;background:var(--primary-xlight);border-radius:var(--radius);border:1px solid rgba(85,27,140,0.15);">
+          <div><div style="font-size:0.75rem;color:var(--gray);">Prix estimé</div><div style="font-size:1.4rem;font-weight:800;color:var(--primary);" id="modal-price">—</div></div>
+          <div><div style="font-size:0.75rem;color:var(--gray);">Durée estimée</div><div style="font-size:1.4rem;font-weight:800;color:var(--dark);" id="modal-duree">—</div></div>
+        </div>
+        <div style="font-size:0.82rem;color:var(--gray);text-align:center;">Le montant sera débité de votre portefeuille à la fin de la course.</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline-gray" onclick="closeModal()">Annuler</button>
+      <button class="btn btn-primary" id="btn-confirm-ride" onclick="confirmRide()"><i class="fas fa-check"></i> Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container" class="toast-container"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="../assets/js/store.js"></script>
+<script>
+let session, wallet, pendingRide = {};
+let selectedVehicle = 'berline';
+let rideType = 'immediat';
+let map;
+
+window.addEventListener('DOMContentLoaded', () => {
+  session = LR.requireAuth('client');
+  if (!session) return;
+  const user = LR.getUserById(session.userId);
+  wallet = LR.getWallet(session.userId);
+
+  // Fill UI
+  document.getElementById('nav-avatar').textContent = session.avatar;
+  document.getElementById('nav-name').textContent = `${session.prenom} ${session.nom}`;
+  document.getElementById('sidebar-avatar').textContent = session.avatar;
+  document.getElementById('sidebar-name').textContent = `${session.prenom} ${session.nom}`;
+
+  const rides = LR.getRides().filter(r => r.clientId === session.userId && r.statut === 'termine');
+  document.getElementById('sidebar-courses').textContent = rides.length;
+  document.getElementById('sidebar-solde').textContent = wallet.solde.toFixed(0) + '€';
+  document.getElementById('s-courses').textContent = rides.length;
+  document.getElementById('s-solde').textContent = wallet.solde.toFixed(2) + '€';
+  document.getElementById('wbr-solde').textContent = wallet.solde.toFixed(2) + ' €';
+
+  renderRecentRides(rides);
+  initMap();
+
+  // Pre-fill from URL
+  const p = new URLSearchParams(location.search);
+  if (p.get('depart')) document.getElementById('depart-input').value = p.get('depart');
+  if (p.get('arrivee')) document.getElementById('arrivee-input').value = p.get('arrivee');
+  if (p.get('depart') && p.get('arrivee')) estimatePrice();
+
+  // Check active ride
+  const activeRide = LR.getActiveRide(session.userId);
+  if (activeRide && activeRide.statut === 'en_cours') {
+    showToast('Vous avez une course en cours !', 'info');
+    setTimeout(() => window.location.href = 'tracking.html', 2000);
+  }
+
+  hideLoader();
+});
+
+function initMap() {
+  map = L.map('main-map').setView([48.8566, 2.3522], 12);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution:'© OSM' }).addTo(map);
+  // Paris marker
+  const parisIcon = L.divIcon({ html:'<div style="background:var(--primary);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3)"><i class="fas fa-bolt" style="color:#FFCC00;"></i></div>', iconSize:[32,32], iconAnchor:[16,32], className:'' });
+  L.marker([48.8566, 2.3522], { icon:parisIcon }).addTo(map).bindPopup('<b>Paris Centre</b><br>Votre zone de service');
+}
+
+function renderRecentRides(rides) {
+  const container = document.getElementById('recent-rides-list');
+  if (!rides.length) return;
+  container.innerHTML = rides.slice(0,4).map(r => `
+    <div class="recent-ride-item">
+      <div class="rri-icon"><i class="fas fa-car"></i></div>
+      <div class="rri-info">
+        <div class="rri-route">${r.depart} → ${r.arrivee}</div>
+        <div class="rri-sub">${formatDate(r.date)} · ${r.distance} km · ${r.duree} min</div>
+      </div>
+      <span class="rri-price">${formatPrice(r.prix)}</span>
+    </div>
+  `).join('');
+}
+
+function setType(type, el) {
+  rideType = type;
+  document.querySelectorAll('.ride-type-tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('date-group').style.display = type === 'programme' ? 'block' : 'none';
+}
+
+function selectVehicle(v, el) {
+  selectedVehicle = v;
+  document.querySelectorAll('.vehicle-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  estimatePrice();
+}
+
+function autocomplete(inp, listId) {
+  const list = document.getElementById(listId);
+  const suggestions = suggestAddresses(inp.value);
+  if (!suggestions.length) { list.style.display='none'; return; }
+  list.innerHTML = suggestions.map(s => `<li onclick="selectSugg('${listId}','${s}')"><i class="fas fa-map-marker-alt"></i>${s}</li>`).join('');
+  list.style.display = 'block';
+  estimatePrice();
+}
+function selectSugg(listId, val) {
+  const field = listId === 'depart-sugg' ? 'depart-input' : 'arrivee-input';
+  document.getElementById(field).value = val;
+  document.getElementById(listId).style.display = 'none';
+  estimatePrice();
+}
+document.addEventListener('click', e => {
+  if (!e.target.closest('.route-point')) {
+    document.querySelectorAll('.suggestions-list').forEach(l => l.style.display = 'none');
+  }
+});
+
+function swapLocations() {
+  const d = document.getElementById('depart-input');
+  const a = document.getElementById('arrivee-input');
+  [d.value, a.value] = [a.value, d.value];
+  estimatePrice();
+}
+
+function estimatePrice() {
+  const d = document.getElementById('depart-input').value;
+  const a = document.getElementById('arrivee-input').value;
+  if (!d || !a) return;
+  const dist  = +(8 + Math.random() * 25).toFixed(1);
+  const duree = Math.round(dist * 2.5 + 5);
+  const baseMultiplier = selectedVehicle === 'van' ? 1.4 : 1;
+  const prix  = +(dist * 1.8 + 4 + duree * 0.3) * baseMultiplier;
+
+  document.getElementById('price-estimate').classList.add('show');
+  document.getElementById('pe-price').textContent = prix.toFixed(2) + ' €';
+  document.getElementById('pe-details').textContent = `~${dist} km · ~${duree} min`;
+
+  pendingRide = { depart:d, arrivee:a, dist, duree, prix:+prix.toFixed(2), vehicle:selectedVehicle };
+}
+
+function bookRide() {
+  const d = document.getElementById('depart-input').value.trim();
+  const a = document.getElementById('arrivee-input').value.trim();
+  if (!d) { showToast('Entrez un point de départ.','warning'); return; }
+  if (!a) { showToast('Entrez une destination.','warning'); return; }
+  estimatePrice();
+  document.getElementById('modal-depart').textContent = pendingRide.depart;
+  document.getElementById('modal-arrivee').textContent = pendingRide.arrivee;
+  document.getElementById('modal-price').textContent = pendingRide.prix.toFixed(2) + ' €';
+  document.getElementById('modal-duree').textContent = '~' + pendingRide.duree + ' min';
+  document.getElementById('confirm-modal').classList.add('open');
+}
+
+function closeModal() { document.getElementById('confirm-modal').classList.remove('open'); }
+
+function confirmRide() {
+  if (wallet.solde < pendingRide.prix) {
+    showToast('Solde insuffisant. Rechargez votre portefeuille.','error');
+    closeModal(); return;
+  }
+  const btn = document.getElementById('btn-confirm-ride');
+  btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> En cours…';
+  setTimeout(() => {
+    LR.createRide({ clientId:session.userId, depart:pendingRide.depart, arrivee:pendingRide.arrivee, prix:pendingRide.prix, duree:pendingRide.duree, distance:pendingRide.dist, statut:'en_attente', paiement:'wallet' });
+    closeModal();
+    showToast('Course commandée ! Recherche d\'un chauffeur…', 'success');
+    btn.disabled=false; btn.innerHTML='<i class="fas fa-check"></i> Confirmer';
+    setTimeout(() => {
+      // Simulate driver accepting
+      const rides = LR.getRides();
+      const r = rides[rides.length-1];
+      LR.updateRide(r.id, { statut:'accepte', chauffeurId:'u2', chauffeurLat:48.86, chauffeurLng:2.35 });
+      showToast('Chauffeur trouvé ! Régine arrive dans ~5 min. 🚗', 'success');
+      setTimeout(() => window.location.href = 'tracking.html', 2500);
+    }, 3000);
+  }, 800);
+}
+</script>
+</body>
+</html>
